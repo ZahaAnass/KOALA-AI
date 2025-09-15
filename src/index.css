@@ -2,15 +2,42 @@
 /* @tailwind utilities; */
 /* @custom-variant dark (&:where(.dark, .dark *)); */
 
-@theme{
-    --primary-50: #60a5fa;
-    --primary-600: #4f96ed;
-    --primary-700: #4286db;
-    --primary-800: #3976c6;
-    --primary-900: #2e66b2;
-    --primary-950: #255698;
+:root {
+    --bot-animation: botAnimate 3s ease-in-out infinite alternate;
+    --slide-animation: slideBgAnimate 8s ease-in-out infinite alternate;
+    --spin-animation: rotateOrbital 100s linear infinite;
 }
 
+@keyframes slideBgAnimate {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes botAnimate {
+    0% {
+        transform: scale(1) rotate(0deg) ;
+    }
+    100% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+}
+
+@keyframes rotateOrbital {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(60deg);
+    }
+}
+
+/* @theme{
+
+} */
 
 body {
     background-color: #0e0c16;
