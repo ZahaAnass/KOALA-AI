@@ -16,15 +16,15 @@ export const RootLayout = () => {
                     <Link to="/" className="logo flex items-center font-bold gap-2">
                         <img src="/logo.png" alt="logo" className="w-12 h-12"/>
                         <span>KOALA AI</span>
-                </Link>
-                <div className="user">
-                    <SignedOut>
-                        <SignInButton />
-                    </SignedOut>
-                    <SignedIn>
-                        <UserButton />
-                    </SignedIn>
-                </div>
+                    </Link>
+                    <div className="user">
+                        <SignedOut>
+                            <SignInButton />
+                        </SignedOut>
+                        <SignedIn>
+                            <UserButton />
+                        </SignedIn>
+                    </div>
             </header>
             <main className="overflow-hidden flex-1">
                 <Outlet />
