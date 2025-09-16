@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom"
+import { TypeAnimation } from "react-type-animation"
+import { useState } from "react"
 
 export const HomePage = () => {
+
+    const [typingStatus, setTypingStatus] = useState("Human1");
 
     return (
         <div className="homepage flex items-center gap-[100px] h-full">
@@ -23,6 +27,43 @@ export const HomePage = () => {
                     </div>
                     <img src="/bot.png" alt="" className="w-full h-full object-contain "
                         style={{animation: "var(--bot-animation)"}}/>
+                    <div className="chat absolute -bottom-8 -right-12 flex items-center gap-2.5 p-5 bg-[#2c2937] rounded-[10px]">
+                        <img src={typingStatus === "Human1" ? "/human1.jpeg" : typingStatus === "Human2" ? "/human2.jpeg" : typingStatus === "Bot" ? "/bot.png" : "/human1.jpeg"}
+                            alt={typingStatus} className="w-8 h-8 rounded-[50px] object-cover"/>
+                        <TypeAnimation
+                            sequence={[
+                                'Human: We produce food for Mice', 
+                                2000, () => {
+                                    setTypingStatus("Bot");
+                                },
+                                'Bot: We produce food for Hamsters', 
+                                2000, () => {
+                                    setTypingStatus("Human2");
+                                },
+                                'Human2: We produce food for Guinea Pigs',
+                                2000, () => {
+                                    setTypingStatus("Bot");
+                                },
+                                'Bot: We produce food for Chinchillas', 
+                                2000,
+                                () => {
+                                console.log('Sequence completed');
+                                },
+                            ]}
+                            wrapper="span"
+                            cursor={true}
+                            repeat={Infinity}
+                            omitDeletionAnimation={true}
+                        />
+                    </div>
+                </div>
+                <div className="terms absolute bottom-5 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-5">
+                    <img src="/logo.png" alt="logo" className="w-4 h-4"/>
+                    <div className="links flex text-[#BBB] gap-2.5 text-xs">
+                        <Link to="/">Terms of Service</Link>
+                        <span>|</span>
+                        <Link to="/">Privacy Policy</Link>
+                    </div>
                 </div>
             </div>
         </div>
