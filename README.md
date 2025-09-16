@@ -7,3 +7,4 @@
 - React Router
 - TailwindCSS
 - Vite
+- React Type Animation
