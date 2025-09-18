@@ -8,4 +8,3 @@
 - TailwindCSS
 - Vite
 - React Type Animation
-
