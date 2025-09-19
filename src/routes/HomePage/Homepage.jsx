@@ -7,13 +7,13 @@ export const HomePage = () => {
     const [typingStatus, setTypingStatus] = useState("Human1");
 
     return (
-        <div className="homepage flex items-center xl:gap-[100px] h-full xl:flex-row lg:flex-col lg:gap-0">
-            <img src="/orbital.png" alt="" className="absolute top-0 left-0 opacity-10 h-4/5"
+        <div className="homepage flex items-center xl:gap-[100px] h-full xl:flex-row not-xl:flex-col not-xl:gap-0">
+            <img src="/orbital.png" alt="" className="absolute top-0 left-0 opacity-10 max-w-4/5 max-h-4/5 z-[-1]"
                 style={{animation: "var(--spin-animation)"}} />
             <div className="left flex-1 flex flex-col items-center justify-center gap-4 text-center">
-                <h1 className="text-[128px] lg:text-6xl bg-gradient-to-r from-[#217bfe] to-[#e55571] bg-clip-text text-transparent">KOALA AI</h1>
+                <h1 className="xl:text-[128px] not-xl:text-6xl bg-gradient-to-r from-[#217bfe] to-[#e55571] bg-clip-text text-transparent">KOALA AI</h1>
                 <h2 className="text-[24px] font-semibold">Supercharge your creativity and productivity</h2>
-                <h3 className="font-normal max-w-3/4 lg:max-w-full">
+                <h3 className="font-normal xl:max-w-3/4 not-xl:max-w-full">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde soluta 
                     ipsam perferendis harum corporis nam! Quis, iure.
                 </h3>
@@ -27,7 +27,7 @@ export const HomePage = () => {
                     </div>
                     <img src="/bot.png" alt="" className="w-full h-full object-contain "
                         style={{animation: "var(--bot-animation)"}}/>
-                    <div className="chat absolute -bottom-8 -right-12 lg:right-0 xl:block lg:hidden flex items-center gap-2.5 p-5 bg-[#2c2937] rounded-[10px]">
+                    <div className="chat absolute -bottom-8 -right-12 not-xl:right-0 xl:block not-xl:hidden flex items-center gap-2.5 p-5 bg-[#2c2937] rounded-[10px]">
                         <img src={typingStatus === "Human1" ? "/human1.jpeg" : typingStatus === "Human2" ? "/human2.jpeg" : typingStatus === "Bot" ? "/bot.png" : "/human1.jpeg"}
                             alt={typingStatus} className="w-8 h-8 rounded-[50px] object-cover"/>
                         <TypeAnimation
