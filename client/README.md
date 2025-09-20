@@ -8,3 +8,5 @@
 - TailwindCSS
 - Vite
 - React Type Animation
+- ImageKit
+- Google GenAI
