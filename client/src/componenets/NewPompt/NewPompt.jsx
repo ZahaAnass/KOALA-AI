@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { Upload } from "../Upload/Upload";
 import { IKImage } from "imagekitio-react";
+import model from "../../lib/gemini";
 
 function NewPompt() {
 
@@ -17,6 +18,22 @@ function NewPompt() {
       endRef.current.scrollIntoView({ behavior: "smooth" });
   }, [])
 
+  const add = async () => {
+    const prompt = "Write a story about an AI and magic";
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          part: "text",
+          text: prompt
+        }
+      ]
+    });
+    const response = await result.response;
+    const text = response.text();
+    console.log(text)
+  }
+
   return (
     <>
       {/* ADD NEW CHAT */}
@@ -31,6 +48,7 @@ function NewPompt() {
           quality={100}
         />
       )}
+      <button onClick={add}>TEST AI</button>
       <div className="endChat pb-24" ref={endRef}></div>
       <form className="newForm w-1/2 absolute bottom-0 bg-[#2c2937] rounded-[20px] flex items-center gap-5 py-0 px-5">
         <Upload setImg={setImg}/>
