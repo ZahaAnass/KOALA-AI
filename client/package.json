@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.47.0",
+    "@google/genai": "^1.20.0",
     "@imagekit/react": "^5.0.1",
     "@tailwindcss/vite": "^4.1.13",
+    "imagekitio-react": "^4.3.0",
     "react": "19.0.0-rc-8b08e99e-20240713",
     "react-dom": "19.0.0-rc-8b08e99e-20240713",
     "react-router-dom": "^7.9.1",
