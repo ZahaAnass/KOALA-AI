@@ -13,24 +13,38 @@ const safetySettings = [
 
 const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_PUBLIC_KEY });
 
-async function SendPrompt(prompt) {
+async function SendPrompt({ image = null, prompt = "" }) {
+
+    let contents = [];
+
+    if(image){
+        contents.push({ 
+            inlineData: {
+                mimeType: image.mimeType,
+                data: image.data,
+            }
+        })
+    }
+
+    if(prompt && prompt.trim()){
+        contents.push({ 
+            text: prompt 
+        })
+    }
+
+    console.log("Sending Content", contents)
 
     const response = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-1.5-flash",
         config: {
             safetySettings,
             thinkingConfig: {
                 thinkingBudget: 0, // Disables thinking
             }
         },
-        contents: [
-            {
-                part: "text",
-                text: prompt,
-            }
-        ]
+        contents: contents
     });
-    console.log(response.text)
+    console.log("Response", response.text)
     return response;
 }
 
