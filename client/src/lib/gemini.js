@@ -13,20 +13,25 @@ const safetySettings = [
 
 const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_PUBLIC_KEY });
 
-const model = genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    config: {
-        safetySettings,
-        // thinkingConfig: {
-        //     thinkingBudget: 0, // Disables thinking
-        // }
-    },
-    contents: [
-        {
-            part: "text",
-            text: "Write a story about an AI and magic",
-        }
-    ]
-});
+async function SendPrompt(prompt) {
 
-export default model;
+    const response = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        config: {
+            safetySettings,
+            thinkingConfig: {
+                thinkingBudget: 0, // Disables thinking
+            }
+        },
+        contents: [
+            {
+                part: "text",
+                text: prompt,
+            }
+        ]
+    });
+    console.log(response.text)
+    return response;
+}
+
+export default SendPrompt;
