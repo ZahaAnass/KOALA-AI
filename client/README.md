@@ -10,3 +10,4 @@
 - React Type Animation
 - ImageKit
 - Google GenAI
+- React Markdown
