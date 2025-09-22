@@ -11,7 +11,8 @@ function NewPompt() {
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
-    dbData:{}
+    dbData:{},
+    aiData:{}
   })
 
   const endRef = useRef(null);
@@ -22,9 +23,19 @@ function NewPompt() {
 
   const Prompt = async (prompt) => {
     setQuestion(prompt)
-    const response = await SendPrompt(prompt);
+    const response = await SendPrompt(
+      img.aiData && Object.keys(img.aiData).length > 0 
+        ? { image: img.aiData.inlineData, prompt } 
+        : { prompt }
+    );
     const text = response.text;
     setAnswer(text)
+    setImg({
+      isLoading: false,
+      error: "",
+      dbData:{},
+      aiData:{}
+    })
   }
 
   const handleSubmit = async (e) => {
