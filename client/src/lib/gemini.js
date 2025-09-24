@@ -19,7 +19,7 @@ async function SendPrompt({ image = null, prompt = "" }) {
     console.log(chunk.text);
   }
 
-  console.log(text.text)
+  console.log(text.text);
   return text;
 }
 
