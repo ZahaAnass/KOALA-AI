@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { Upload } from "../Upload/Upload";
 import { IKImage } from "imagekitio-react";
-import SendPrompt from "../../lib/gemini";
+import SendPrompt from "../../lib/gemini-test";
 import Markdown from "react-markdown";
 
 function NewPompt() {
