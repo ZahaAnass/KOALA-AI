@@ -11,3 +11,6 @@
 - ImageKit
 - Google GenAI
 - React Markdown
+- Express
+- Mongoose
+- dotenv
