@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { Upload } from "../Upload/Upload";
 import { IKImage } from "imagekitio-react";
-import SendPrompt from "../../lib/gemini";
+import { SendPrompt, config, genAI } from "../../lib/gemini";
 import Markdown from "react-markdown";
 
 function NewPompt() {
@@ -38,6 +38,43 @@ function NewPompt() {
     })
   }
 
+  const newPrompt = async (prompt) => {
+    setQuestion(prompt)
+  
+    let contents = [];
+
+    if(img.aiData && Object.keys(img.aiData).length > 0){
+        contents.push({ 
+          inlineData: img.aiData.inlineData
+        })
+    }
+
+    if(prompt && prompt.trim()){
+        contents.push({ 
+            text: prompt 
+        })
+    }
+
+    console.log("Sending Content", contents)
+
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: contents,
+      config: config,
+      maxOutputTokens: 100,
+    })
+
+    const text = response.text;
+    setAnswer(text)
+
+    setImg({
+      isLoading: false,
+      error: "",
+      dbData:{},
+      aiData:{}
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -50,8 +87,10 @@ function NewPompt() {
       error: ""
     })
 
+    setAnswer("")
+
     try{
-      await Prompt(text);
+      await newPrompt(text);
       e.target.text.value = "";
     }catch(err){
       setImg({
