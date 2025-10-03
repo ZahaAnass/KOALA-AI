@@ -17,6 +17,20 @@ function NewPompt() {
 
   const endRef = useRef(null);
 
+  const chat = genAI.chats.create({
+    model: "gemini-2.5-flash",
+    history: [
+      {
+        role: "user",
+        parts: [{ text: "Hello" }],
+      },
+      {
+        role: "model",
+        parts: [{ text: "Great to meet you. What would you like to know?" }],
+      },
+    ],
+  });
+
   useEffect(() => {
       endRef.current.scrollIntoView({ behavior: "smooth" });
   }, [answer, question, img.dbData])
@@ -38,24 +52,29 @@ function NewPompt() {
         })
     }
 
-    console.log("Sending Content", contents)
+    // console.log("Sending Content", contents)
 
-    const response = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: contents,
+    const response = await chat.sendMessageStream({
+      message: contents,
       config: config,
       maxOutputTokens: 100,
     })
 
-    const text = response.text;
-    setAnswer(text)
-
+    let accumulatedText = "";
+    for await (const chunk of response) {
+      console.log(chunk.text);
+      console.log("_".repeat(80));
+      accumulatedText += chunk.text;
+      setAnswer(accumulatedText)
+    }
+    
     setImg({
       isLoading: false,
       error: "",
       dbData:{},
       aiData:{}
     })
+
   }
 
   const handleSubmit = async (e) => {
