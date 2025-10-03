@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { Upload } from "../Upload/Upload";
 import { IKImage } from "imagekitio-react";
-import { SendPrompt, config, genAI } from "../../lib/gemini";
+import { config, genAI } from "../../lib/gemini";
 import Markdown from "react-markdown";
 
 function NewPompt() {
@@ -20,23 +20,6 @@ function NewPompt() {
   useEffect(() => {
       endRef.current.scrollIntoView({ behavior: "smooth" });
   }, [answer, question, img.dbData])
-
-  const Prompt = async (prompt) => {
-    setQuestion(prompt)
-    const response = await SendPrompt(
-      img.aiData && Object.keys(img.aiData).length > 0 
-        ? { image: img.aiData.inlineData, prompt } 
-        : { prompt }
-    );
-    const text = response.text;
-    setAnswer(text)
-    setImg({
-      isLoading: false,
-      error: "",
-      dbData:{},
-      aiData:{}
-    })
-  }
 
   const newPrompt = async (prompt) => {
     setQuestion(prompt)
