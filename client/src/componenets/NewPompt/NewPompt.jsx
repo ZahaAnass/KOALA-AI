@@ -62,8 +62,8 @@ function NewPompt() {
 
     let accumulatedText = "";
     for await (const chunk of response) {
-      console.log(chunk.text);
-      console.log("_".repeat(80));
+      // console.log(chunk.text);
+      // console.log("_".repeat(80));
       accumulatedText += chunk.text;
       setAnswer(accumulatedText)
     }
