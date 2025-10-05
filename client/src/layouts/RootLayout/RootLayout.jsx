@@ -25,11 +25,11 @@ export const RootLayout = () => {
                             <UserButton />
                         </SignedIn>
                     </div>
-            </header>
-            <main className="overflow-hidden flex-1">
-                <Outlet />
-            </main>
-        </div>
+                </header>
+                <main className="overflow-hidden flex-1">
+                    <Outlet />
+                </main>
+            </div>
         </ClerkProvider>
     )
 }
