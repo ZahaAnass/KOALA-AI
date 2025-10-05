@@ -3,6 +3,9 @@ import ImageKit from "imagekit"
 import dotenv from "dotenv"
 import cors from "cors"
 import mongoose from "mongoose"
+import Chat from "./models/Chat.js"
+import UserChats from "./models/UserChats.js"
+// import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node"
 
 dotenv.config()
 
@@ -11,10 +14,13 @@ const app = express();
 app.use(
     cors(
         {
-            origin: process.env.CLIENT_URL
+            origin: process.env.CLIENT_URL,
+            credentials: true
         }
     )
 )
+
+app.use(express.json())
 
 const connect = async () => {
     try{
@@ -35,6 +41,67 @@ app.get("/api/upload", (req, res) => {
     const result = imagekit.getAuthenticationParameters();
     res.send(result);
 });
+
+app.get("/api/test", ClerkExpressRequireAuth(), (req, res) => {
+    console.log("Success!")
+    res.send("Success!")
+})
+
+app.post("/api/chats", ClerkExpressRequireAuth(), async (req, res) => {
+    const { text, userId } = req.body
+
+    if (!text) {
+        return res.status(400).json({ message: "Text is required" })
+    }
+
+    try{
+        // CREATE NEW CHAT 
+        const newChat = new Chat({
+            userId,
+            history: [{ role:"user", parts: [{text}] }]
+        })
+
+        const savedChat = await newChat.save()
+
+        // CHECK IF THE USERCHARS EXISTS
+        const userChats = await UserChats.findOne({ userId })
+
+        // IF USERCHATS DOES NOT EXISTS CREATE A NEW ONE AND THE CHAT IN THE CHATS ARRAY
+        if (!userChats) {
+            const newUserChats = new UserChats({
+                userId,
+                title: text.substring(0, 40),
+            })
+
+            await newUserChats.save()
+            console.log("new userChat created")
+        }else{
+            // IF USERCHATS EXISTS ADD THE CHAT TO THE CHATS ARRAY
+            UserChats.updateOne(
+                { userId },
+                { $push: { 
+                    chats: { 
+                        _id: savedChat._id, 
+                        title: text.substring(0, 40), 
+                        createAt: new Date() 
+                    } 
+                } }
+            )
+
+            console.log("new chat added to userChats")
+            res.status(201).send(newChat._id)
+        }
+
+    }catch(err){
+        console.log(err)
+        res.status(500).send("Error Creating Chat")
+    }
+});
+
+app.use((err, req, res, next) => {
+    console.log(err.stack)
+    res.status(401).send("Unauthenticated")
+})
 
 app.listen(port, () => {
     connect();
