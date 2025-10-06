@@ -5,8 +5,9 @@ import cors from "cors"
 import mongoose from "mongoose"
 import Chat from "./models/Chat.js"
 import UserChats from "./models/UserChats.js"
-import { clerkMiddleware, clerkClient, requireAuth, getAuth,
-    
+import {
+    clerkClient, requireAuth,
+
 } from "@clerk/express"
 
 dotenv.config()
@@ -24,13 +25,11 @@ app.use(
 
 app.use(express.json())
 
-app.use(clerkMiddleware())
-
 const connect = async () => {
-    try{
+    try {
         await mongoose.connect(process.env.MONGO_URI);
         console.log("Connected to MongoDB");
-    }catch(err){
+    } catch (err) {
         console.log(err)
     }
 }
@@ -46,24 +45,52 @@ app.get("/", (req, res) => {
     res.send("Backend is running 🚀");
 });
 
+const getAuth = async (req) => {
+    const authHeader = req.headers.authorization
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return null
+    }
+
+    const token = authHeader.substring(7)
+
+    try {
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const userId = decoded.sub
+
+        if (!userId) {
+            return null
+        }
+
+        console.log('✅ Authenticated user:', userId)
+        return userId
+    } catch (error) {
+        console.error('❌ JWT decoding failed:', error.message)
+        return null
+    }
+}
+
 app.get("/api/upload", (req, res) => {
     const result = imagekit.getAuthenticationParameters();
     res.send(result);
 });
 
 app.get("/api/test", async (req, res) => {
-    console.log("req: ", getAuth(req))
-    const { userId, sessionClaims } = getAuth(req)
-    console.log("userId", userId)
-    console.log("sessionClaims", sessionClaims)
+    try {
+        const userId = await getAuth(req)
 
-    const users = await clerkClient.users.getUserList()
-    
-    // console.log(users)
-    res.status(200).send(users.data[0].firstName + " " + users.data[0].lastName)
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthenticated' })
+            return
+        }
 
-    // console.log("Success!")
-    // res.send("Success!")
+        const user = await clerkClient.users.getUser(userId)
+
+        res.json({ userId: user.id })
+    } catch (error) {
+        console.error('❌ Error in /api/test endpoint:', error)
+        res.status(500).json({ error: 'Internal server error', details: error.message })
+    }
 })
 
 app.post("/api/chats", requireAuth(), async (req, res) => {
@@ -73,11 +100,11 @@ app.post("/api/chats", requireAuth(), async (req, res) => {
         return res.status(400).json({ message: "Text is required" })
     }
 
-    try{
+    try {
         // CREATE NEW CHAT 
         const newChat = new Chat({
             userId,
-            history: [{ role:"user", parts: [{text}] }]
+            history: [{ role: "user", parts: [{ text }] }]
         })
 
         const savedChat = await newChat.save()
@@ -94,33 +121,30 @@ app.post("/api/chats", requireAuth(), async (req, res) => {
 
             await newUserChats.save()
             console.log("new userChat created")
-        }else{
+        } else {
             // IF USERCHATS EXISTS ADD THE CHAT TO THE CHATS ARRAY
             UserChats.updateOne(
                 { userId },
-                { $push: { 
-                    chats: { 
-                        _id: savedChat._id, 
-                        title: text.substring(0, 40), 
-                        createAt: new Date() 
-                    } 
-                } }
+                {
+                    $push: {
+                        chats: {
+                            _id: savedChat._id,
+                            title: text.substring(0, 40),
+                            createAt: new Date()
+                        }
+                    }
+                }
             )
 
             console.log("new chat added to userChats")
             res.status(201).send(newChat._id)
         }
 
-    }catch(err){
+    } catch (err) {
         console.log(err)
         res.status(500).send("Error Creating Chat")
     }
 });
-
-app.use((err, req, res, next) => {
-    console.log(err.stack)
-    res.status(401).send("Unauthenticated")
-})
 
 app.listen(port, () => {
     connect();
