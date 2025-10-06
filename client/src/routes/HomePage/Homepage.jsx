@@ -1,10 +1,32 @@
 import { Link } from "react-router-dom"
 import { TypeAnimation } from "react-type-animation"
 import { useState } from "react"
+import { useAuth } from "@clerk/clerk-react"
 
 export const HomePage = () => {
 
     const [typingStatus, setTypingStatus] = useState("Human1");
+    const { getToken } = useAuth();
+    const test = async () => {
+        const token = await getToken();
+        console.log("token: ", token)
+        try {
+          const url = "http://localhost:3000/api/test";
+          console.log("Fetching:", url);
+          const res = await fetch(url, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+          });
+          const data = await res.text();
+          console.log("Response:", data);
+        } catch (err) {
+          console.error("Error fetching /api/test:", err);
+        }
+      };
+      
 
     return (
         <div className="homepage flex items-center xl:gap-[100px] h-full xl:flex-row not-xl:flex-col not-xl:gap-0">
@@ -17,7 +39,10 @@ export const HomePage = () => {
                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde soluta 
                     ipsam perferendis harum corporis nam! Quis, iure.
                 </h3>
-                <Link to="/dashboard" className="py-3.5 px-6 text-white bg-[#217bfe] rounded-2xl text-sm mt-5 hover:bg-white hover:text-[#217bfe] transition-colors">Get Started</Link>
+                <Link to="/dashboard" className="py-3.5 px-6 text-white bg-[#217bfe] rounded-2xl text-sm mt-5 hover:bg-white hover:text-[#217bfe] transition-colors">
+                    Get Started
+                </Link>
+                <button onClick={() => {test()}} className="py-3.5 px-6 text-white bg-[#217bfe] rounded-2xl text-sm mt-5 hover:bg-white hover:text-[#217bfe] transition-colors">Test</button>
             </div>
             <div className="right flex-1 flex items-center justify-center">
                 <div className="imgContainer relative flex items-center justify-center bg-[#140e2d] rounded-[50px] w-4/5 h-1/2">
