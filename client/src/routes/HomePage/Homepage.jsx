@@ -6,27 +6,32 @@ import { useAuth } from "@clerk/clerk-react"
 export const HomePage = () => {
 
     const [typingStatus, setTypingStatus] = useState("Human1");
+
     const { getToken } = useAuth();
     const test = async () => {
         const token = await getToken();
-        console.log("token: ", token)
         try {
-          const url = "http://localhost:3000/api/test";
-          console.log("Fetching:", url);
-          const res = await fetch(url, {
-            method: "GET",
-            credentials: "include",
-            headers: {
-                Authorization: `Bearer ${token}`,
+            const response = await fetch("http://localhost:3000/api/test", {
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.log('Error response: ', errorText)
+                return
             }
-          });
-          const data = await res.text();
-          console.log("Response:", data);
+
+            const data = await response.json();
+            console.log(data.userId)
+
         } catch (err) {
-          console.error("Error fetching /api/test:", err);
+            console.error("Error fetching /api/test:", err);
         }
-      };
-      
+    };
 
     return (
         <div className="homepage flex items-center xl:gap-[100px] h-full xl:flex-row not-xl:flex-col not-xl:gap-0">
