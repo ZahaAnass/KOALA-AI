@@ -14,3 +14,4 @@
 - Express
 - Mongoose
 - dotenv
+- React Query
