@@ -2,22 +2,38 @@ import { useAuth } from "@clerk/clerk-react";
 
 export const DashboardPage = () => {
 
-    const { userId } = useAuth();
+    const { getToken } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const text = e.target.text.value;
         if(!text) return;
 
-        await fetch("http://localhost:3000/api/chats", {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ text })
-        })
+        const token = await getToken();
 
+        try {
+            const response = await fetch("http://localhost:3000/api/chats", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ text })
+            })
+
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.log('Error response: ', errorText)
+                return
+            }
+
+            const data = await response.json();
+            console.log(data)
+
+        } catch (err) {
+            console.error("Error fetching /api/chats:", err);
+        }
     }
 
     return (
