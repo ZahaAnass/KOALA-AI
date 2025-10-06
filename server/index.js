@@ -22,6 +22,14 @@ app.use(
 
 app.use(express.json())
 
+app.use((req, res, next) => {
+    if (req.statusCode === 404) {
+        res.status(404).json({ error: "Not Found" })
+    } else {
+        next()
+    }
+})
+
 const connect = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
@@ -147,6 +155,22 @@ app.post("/api/chats", async (req, res) => {
         res.status(500).json({ error: "Error Creating Chat" });
     }
 });
+
+app.get("/api/userchats", async (req, res) => {
+    const userId = await getAuth(req)
+
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthenticated' })
+    }
+
+    try {
+        const userChats = await UserChats.find({ userId: userId });
+        res.status(200).json(userChats[0].chats)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: "Error Fetching User Chats" });
+    }
+})
 
 app.listen(port, () => {
     connect();
