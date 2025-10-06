@@ -5,7 +5,9 @@ import cors from "cors"
 import mongoose from "mongoose"
 import Chat from "./models/Chat.js"
 import UserChats from "./models/UserChats.js"
-// import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node"
+import { clerkMiddleware, clerkClient, requireAuth, getAuth,
+    
+} from "@clerk/express"
 
 dotenv.config()
 
@@ -22,6 +24,8 @@ app.use(
 
 app.use(express.json())
 
+app.use(clerkMiddleware())
+
 const connect = async () => {
     try{
         await mongoose.connect(process.env.MONGO_URI);
@@ -37,17 +41,32 @@ const imagekit = new ImageKit({
     privateKey: process.env.IMAGE_KIT_PRIVATE_KEY
 });
 
+app.get("/", (req, res) => {
+    console.log("Backend is running 🚀")
+    res.send("Backend is running 🚀");
+});
+
 app.get("/api/upload", (req, res) => {
     const result = imagekit.getAuthenticationParameters();
     res.send(result);
 });
 
-app.get("/api/test", ClerkExpressRequireAuth(), (req, res) => {
-    console.log("Success!")
-    res.send("Success!")
+app.get("/api/test", async (req, res) => {
+    console.log("req: ", getAuth(req))
+    const { userId, sessionClaims } = getAuth(req)
+    console.log("userId", userId)
+    console.log("sessionClaims", sessionClaims)
+
+    const users = await clerkClient.users.getUserList()
+    
+    // console.log(users)
+    res.status(200).send(users.data[0].firstName + " " + users.data[0].lastName)
+
+    // console.log("Success!")
+    // res.send("Success!")
 })
 
-app.post("/api/chats", ClerkExpressRequireAuth(), async (req, res) => {
+app.post("/api/chats", requireAuth(), async (req, res) => {
     const { text, userId } = req.body
 
     if (!text) {
