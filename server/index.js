@@ -5,10 +5,7 @@ import cors from "cors"
 import mongoose from "mongoose"
 import Chat from "./models/Chat.js"
 import UserChats from "./models/UserChats.js"
-import {
-    clerkClient, requireAuth,
-
-} from "@clerk/express"
+import { clerkClient } from "@clerk/express"
 
 dotenv.config()
 
@@ -93,56 +90,61 @@ app.get("/api/test", async (req, res) => {
     }
 })
 
-app.post("/api/chats", requireAuth(), async (req, res) => {
-    const { text, userId } = req.body
+app.post("/api/chats", async (req, res) => {
+    const userId = await getAuth(req)
 
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthenticated' })
+    }
+
+    const { text } = req.body;
     if (!text) {
-        return res.status(400).json({ message: "Text is required" })
+        return res.status(400).json({ message: "Text is required" });
     }
 
     try {
-        // CREATE NEW CHAT 
+        // CREATE A NEW CHAT
         const newChat = new Chat({
-            userId,
-            history: [{ role: "user", parts: [{ text }] }]
-        })
+            userId: userId,
+            history: [{ role: "user", parts: [{ text }] }],
+        });
+        const savedChat = await newChat.save();
 
-        const savedChat = await newChat.save()
+        // CHECK IF THE USERCHATS EXISTS
+        const userChats = await UserChats.find({ userId: userId });
 
-        // CHECK IF THE USERCHARS EXISTS
-        const userChats = await UserChats.findOne({ userId })
-
-        // IF USERCHATS DOES NOT EXISTS CREATE A NEW ONE AND THE CHAT IN THE CHATS ARRAY
-        if (!userChats) {
+        // IF DOESN'T EXIST CREATE A NEW ONE
+        if (!userChats.length) {
             const newUserChats = new UserChats({
-                userId,
-                title: text.substring(0, 40),
-            })
-
-            await newUserChats.save()
-            console.log("new userChat created")
+                userId: userId,
+                chats: [
+                    {
+                        _id: savedChat._id,
+                        title: text.substring(0, 40),
+                    },
+                ],
+            });
+            await newUserChats.save();
         } else {
-            // IF USERCHATS EXISTS ADD THE CHAT TO THE CHATS ARRAY
-            UserChats.updateOne(
-                { userId },
+            // IF EXISTS, PUSH THE CHAT
+            await UserChats.updateOne(
+                { userId: userId },
                 {
                     $push: {
                         chats: {
                             _id: savedChat._id,
                             title: text.substring(0, 40),
-                            createAt: new Date()
-                        }
-                    }
+                        },
+                    },
                 }
-            )
-
-            console.log("new chat added to userChats")
-            res.status(201).send(newChat._id)
+            );
         }
 
+        res.status(201).json({ chatId: savedChat._id });
+
     } catch (err) {
-        console.log(err)
-        res.status(500).send("Error Creating Chat")
+        console.log(err);
+        res.status(500).json({ error: "Error Creating Chat" });
     }
 });
 
