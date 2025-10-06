@@ -1,5 +1,24 @@
+import { useAuth } from "@clerk/clerk-react";
 
 export const DashboardPage = () => {
+
+    const { userId } = useAuth();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const text = e.target.text.value;
+        if(!text) return;
+
+        await fetch("http://localhost:3000/api/chats", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text })
+        })
+
+    }
 
     return (
         <div className="dashboardPage h-full flex flex-col items-center">
@@ -24,8 +43,8 @@ export const DashboardPage = () => {
                 </div>
             </div>
             <div className="formContainer mt-auto w-1/2 bg-[#2c2937] rounded-[20px] flex">
-                <form className="w-full h-full flex items-center justify-between gap-5 mb-2.5">
-                    <input type="text" placeholder="Ask me anything..." className="flex-1 p-5 bg-transparent border-0 outline-none text-[#ececec]"/>
+                <form onSubmit={handleSubmit} className="w-full h-full flex items-center justify-between gap-5 mb-2.5">
+                    <input name="text" type="text" placeholder="Ask me anything..." className="flex-1 p-5 bg-transparent border-0 outline-none text-[#ececec]"/>
                     <button className="bg-[#605e68] rounded-[50%] border-0 cursor-pointer p-2.5 flex items-center justify-center mr-5">
                         <img src="/arrow.png" alt="arrow" className="w-4 h-4 "/>
                     </button>
