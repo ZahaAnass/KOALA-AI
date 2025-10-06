@@ -11,3 +11,4 @@
 - ImageKit
 - Google GenAI
 - React Markdown
+- React Query
