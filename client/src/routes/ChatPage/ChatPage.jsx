@@ -14,7 +14,7 @@ export const ChatPage = () => {
     const { getToken } = useAuth()
 
     const { isPending, error, data } = useQuery({
-        queryKey: ['singleChat', chatId],
+        queryKey: ['chat', chatId],
         queryFn: async () => {
             const token = await getToken()
 
@@ -63,7 +63,7 @@ export const ChatPage = () => {
                     </>
                 ))}
 
-                    <NewPompt />
+                    <NewPompt data={data}/>
                 </div>
             </div>
         </div>
