@@ -8,7 +8,7 @@ function ChatList() {
     const { getToken } = useAuth()
 
     const { isPending, error, data } = useQuery({
-        queryKey: ['repoData'],
+        queryKey: ['userChats'],
         queryFn: async () => {
             const token = await getToken()
 
