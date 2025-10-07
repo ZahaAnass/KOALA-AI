@@ -34,16 +34,16 @@ export const Upload = ({ setImg }) => {
     const ikUploadRef = useRef(null)
 
     const onError = err => {
-        console.log("Error", err);
+        // console.log("Error", err);
     };
     
     const onSuccess = res => {
-        console.log("Success", res);
+        // console.log("Success", res);
         setImg(prevImg => ({ ...prevImg, isLoading: false, dbData: res }))
     };
     
-    const onUploadProgress = progress => {
-        console.log("Progress", progress);
+    const onUploadProgress = (progress) => {
+        // console.log("Progress", progress);
     };
     
     const onUploadStart = evt => {
