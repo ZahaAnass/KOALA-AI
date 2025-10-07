@@ -63,7 +63,7 @@ export const ChatPage = () => {
                     </>
                 ))}
 
-                    <NewPompt data={data}/>
+                    {data && <NewPompt data={data}/>}
                 </div>
             </div>
         </div>
