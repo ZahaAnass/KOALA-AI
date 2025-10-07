@@ -172,7 +172,31 @@ app.get("/api/userchats", async (req, res) => {
     }
 })
 
-app.listen(port, () => {
-    connect();
+app.get("/api/chats/:id", async (req, res) => {
+    const userId = await getAuth(req)
+    const { id } = req.params
+
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthenticated' })
+    }
+
+    if (!id) {
+        return res.status(400).json({ error: 'Chat ID is required' })
+    }
+
+    try {
+        const chat = await Chat.findOne({ _id: id, userId });
+        if (!chat) {
+            return res.status(404).json({ error: 'Chat not found' })
+        }
+        res.status(200).json(chat)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: "Error Fetching Chat" });
+    }
+})
+
+app.listen(port, async () => {
+    await connect();
     console.log("Server is running on port", port)
 })
