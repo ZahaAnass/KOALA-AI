@@ -4,8 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node --loader ts-node/esm server.ts",
-    "dev": "nodemon --exec ts-node server.ts"
+    "start": "node dist/server.js",
+    "dev": "tsx watch server.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
     "@types/mongoose": "^5.11.96",
     "@types/node": "^24.7.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
 }
