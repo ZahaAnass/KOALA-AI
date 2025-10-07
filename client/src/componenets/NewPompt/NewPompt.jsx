@@ -33,6 +33,18 @@ function NewPompt({ data }) {
     ],
   });
 
+  // ! REMOVE THIS IN PRODUCTION 
+  const hasRun = useRef(false)
+
+  useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
+    if (data?.history?.length == 1) {
+      newPrompt(data?.history[0]?.parts[0]?.text, true)
+    }
+  }, [])
+
   useEffect(() => {
       endRef.current.scrollIntoView({ behavior: "smooth" });
   }, [data, answer, question, img.dbData])
@@ -86,8 +98,8 @@ function NewPompt({ data }) {
       }
   })
 
-  const newPrompt = async (prompt) => {
-    setQuestion(prompt)
+  const newPrompt = async (prompt, isInitial) => {
+    if (!isInitial) setQuestion(prompt)
 
     try {
 
@@ -141,7 +153,7 @@ function NewPompt({ data }) {
     setAnswer("")
 
     try{
-      await newPrompt(text);
+      await newPrompt(text, false);
       e.target.text.value = "";
     }catch(err){
       setImg({
