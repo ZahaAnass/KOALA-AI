@@ -4,8 +4,10 @@ import { Upload } from "../Upload/Upload";
 import { IKImage } from "imagekitio-react";
 import { config, genAI } from "../../lib/gemini";
 import Markdown from "react-markdown";
+import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function NewPompt() {
+function NewPompt({ data }) {
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")
   const [img, setImg] = useState({
@@ -33,47 +35,94 @@ function NewPompt() {
 
   useEffect(() => {
       endRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [answer, question, img.dbData])
+  }, [data, answer, question, img.dbData])
+
+  const { getToken } = useAuth();
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+      mutationFn: async () => {
+          const token = await getToken();
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/${data._id}`, {
+              method: "PUT",
+              credentials: "include",
+              headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+              },
+              body: JSON.stringify({ 
+                question: question.length ? question : undefined,
+                answer,
+                img: img.dbData?.filePath || undefined
+              })
+          })
+
+          if (!response.ok) {
+              const errorText = await response.text()
+              console.log('Error response: ', errorText)
+              return
+          }
+
+          const responseData = await response.json()
+          return responseData
+      },
+      onSuccess: () => {
+          queryClient
+            .invalidateQueries({ queryKey: ['chat', data._id] })
+            .then(() => {
+              setQuestion("")
+              setAnswer("")
+              setImg({
+                isLoading: false,
+                error: "",
+                dbData:{},
+                aiData:{}
+              })
+            })
+      },
+      onError: (err) => {
+        console.log(err)
+      }
+  })
 
   const newPrompt = async (prompt) => {
     setQuestion(prompt)
+
+    try {
+
+      let contents = [];
   
-    let contents = [];
+      if(img.aiData && Object.keys(img.aiData).length > 0){
+          contents.push({ 
+            inlineData: img.aiData.inlineData
+          })
+      }
+  
+      if(prompt && prompt.trim()){
+          contents.push({ 
+              text: prompt 
+          })
+      }
 
-    if(img.aiData && Object.keys(img.aiData).length > 0){
-        contents.push({ 
-          inlineData: img.aiData.inlineData
-        })
+      const response = await chat.sendMessageStream({
+        message: contents,
+        config: config,
+        maxOutputTokens: 100,
+      })
+  
+      let accumulatedText = "";
+      for await (const chunk of response) {
+        accumulatedText += chunk.text;
+        setAnswer(accumulatedText)
+      }
+
+      setTimeout(() => mutation.mutate(), 2000)
+
+    } catch (error) {
+      console.log(error)
     }
 
-    if(prompt && prompt.trim()){
-        contents.push({ 
-            text: prompt 
-        })
-    }
-
-    // console.log("Sending Content", contents)
-
-    const response = await chat.sendMessageStream({
-      message: contents,
-      config: config,
-      maxOutputTokens: 100,
-    })
-
-    let accumulatedText = "";
-    for await (const chunk of response) {
-      // console.log(chunk.text);
-      // console.log("_".repeat(80));
-      accumulatedText += chunk.text;
-      setAnswer(accumulatedText)
-    }
-    
-    setImg({
-      isLoading: false,
-      error: "",
-      dbData:{},
-      aiData:{}
-    })
 
   }
 
@@ -102,6 +151,7 @@ function NewPompt() {
       console.log(err)
     }finally{
       setImg({
+        ...img,
         isLoading: false,
       })
     }
