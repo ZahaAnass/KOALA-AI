@@ -67,7 +67,7 @@ const getAuth = async (req) => {
             return null
         }
 
-        console.log('✅ Authenticated user:', userId)
+        // console.log('✅ Authenticated user:', userId)
         return userId
     } catch (error) {
         console.error('❌ JWT decoding failed:', error.message)
@@ -165,6 +165,11 @@ app.get("/api/userchats", async (req, res) => {
 
     try {
         const userChats = await UserChats.find({ userId: userId });
+
+        if (!userChats.length) {
+            return res.status(200).json([])
+        }
+
         res.status(200).json(userChats[0].chats)
     } catch (err) {
         console.log(err);
@@ -194,6 +199,50 @@ app.get("/api/chats/:id", async (req, res) => {
         console.log(err);
         res.status(500).json({ error: "Error Fetching Chat" });
     }
+})
+
+app.put("/api/chats/:id", async (req, res) => {
+    const userId = await getAuth(req)
+    const { id } = req.params
+    const { question, answer, img } = req.body
+
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthenticated' })
+    }
+
+    if (!id) {
+        return res.status(400).json({ error: 'Chat ID is required' })
+    }
+
+    const newItems = [
+        ...(question 
+            ? [ { role: "user", parts: [{ text: question }], ...(img && { img }) } ]
+            : []),
+        { role: "model", parts: [{ text: answer }] }
+    ]
+
+    try {
+
+        const updatedChat = await Chat.updateOne({
+            _id: id,
+            userId
+        }, {
+            $push: {
+                history:{
+                    $each: newItems
+                }
+            },
+        })
+
+        // const modifiedChat = await Chat.findOne({ _id: id, userId })
+        // console.log(modifiedChat)
+
+        res.status(200).json(updatedChat)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send("Error adding conversation")
+    }
+
 })
 
 app.listen(port, async () => {
