@@ -1,18 +1,19 @@
 import { useAuth } from "@clerk/clerk-react";
+import { useQueryClient, useMutation } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom";
 
 export const DashboardPage = () => {
 
     const { getToken } = useAuth();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const text = e.target.text.value;
-        if(!text) return;
+    const queryClient = useQueryClient();
 
-        const token = await getToken();
+    const navigate = useNavigate()
 
-        try {
-            const response = await fetch("http://localhost:3000/api/chats", {
+    const mutation = useMutation({
+        mutationFn: async (text) => {
+            const token = await getToken();
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -28,12 +29,21 @@ export const DashboardPage = () => {
                 return
             }
 
-            const data = await response.json();
-            console.log(data)
-
-        } catch (err) {
-            console.error("Error fetching /api/chats:", err);
+            const data = await response.json()
+            return data
+        },
+        onSuccess: ({chatId}) => {
+            queryClient.invalidateQueries({ queryKey: ['userChats'] })
+            navigate(`/dashboard/chats/${chatId}`)
         }
+    })
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const text = e.target.text.value;
+        if(!text) return;
+
+        mutation.mutate(text)
     }
 
     return (
