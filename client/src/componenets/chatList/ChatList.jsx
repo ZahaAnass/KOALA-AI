@@ -39,12 +39,15 @@ function ChatList() {
             <Link to="/">Contact </Link>
             <hr className="border-0 h-0.5 bg-[#ddd] opacity-10 rounded-[5px] my-5 mx-0"/>
             <div className="list flex flex-col overflow-scroll">
-                {isPending ? <p>Loading...</p> : error ? <p>Somthing went wrong!</p> : data?.map((chat) => (
-                    <Link key={chat._id} to={`/dashboard/chats/${chat._id}`} 
-                        className="p-2.5 rounded-[10px] hover:bg-[#2c2937]">
-                        {chat.title}
-                    </Link>
-                ))}
+                {isPending ? <p>Loading...</p> 
+                    : error ? <p>Somthing went wrong!</p> 
+                    : data.length === 0 ? <p>No Chats Found</p> 
+                    : data?.map((chat) => (
+                        <Link key={chat._id} to={`/dashboard/chats/${chat._id}`} 
+                            className="p-2.5 rounded-[10px] hover:bg-[#2c2937]">
+                            {chat.title}
+                        </Link>
+                    ))}
             </div>
             <hr className="border-0 h-0.5 bg-[#ddd] opacity-10 rounded-[5px] my-5 mx-0"/>
             <div className="upgrade mt-auto flex items-center gap-2.5 text-xs">
