@@ -9,7 +9,7 @@
 - Vite
 - React Type Animation
 - ImageKit
-- Google GenAI
+- Google GenAI 
 - React Markdown
 - Express
 - Mongoose
