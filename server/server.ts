@@ -6,7 +6,7 @@ dotenv.config();
 
 const port: number | string = process.env.PORT || 3000;
 
-app.listen(port, async () => {
+app.listen(port as number, async () => {
     await connectDB(process.env.MONGO_URI as string);
     console.log("Connected to MongoDB");
     console.log(`Server is running on port ${port}`);

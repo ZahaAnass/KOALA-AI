@@ -15,9 +15,9 @@ app.use(express.json());
 
 app.get("/", (_: express.Request, res: express.Response) => res.send("Backend is running 🚀"));
 
-app.use("/api/chats", chatRoutes);
-app.use("/api/userchats", userChatsRoutes);
-app.use("/api/upload", uploadRoutes);
+app.use("/api/chats", chatRoutes as express.Router);
+app.use("/api/userchats", userChatsRoutes as express.Router);
+app.use("/api/upload", uploadRoutes as express.Router);
 
 app.use(notFound);
 
