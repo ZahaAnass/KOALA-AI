@@ -1,15 +1,15 @@
 import { Request } from "express";
 
-const getAuth = async (req: Request) => {
+const getAuth = async (req: Request): Promise<string | null> => {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) return null;
 
-    const token = authHeader.substring(7);
+    const token: string = authHeader.substring(7);
     try {
-        const decoded = JSON.parse(
+        const decoded: any = JSON.parse(
             Buffer.from(token.split(".")[1], "base64").toString()
         );
-        const userId = decoded.sub
+        const userId: string = decoded.sub;
 
         if (!userId) {
             return null

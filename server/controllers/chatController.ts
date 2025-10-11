@@ -3,8 +3,8 @@ import UserChats from "../models/UserChats.js";
 import getAuth from "../utils/getAuth.js";
 import { Request, Response } from "express";
 
-export const createChat = async (req: Request, res: Response) => {
-    const userId = await getAuth(req);
+export const createChat = async (req: Request, res: Response): Promise<Response | void> => {
+    const userId: string | null = await getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthenticated" });
 
     const { text } = req.body;
@@ -37,14 +37,14 @@ export const createChat = async (req: Request, res: Response) => {
     }
 
     res.status(201).json({ chatId: savedChat._id });
-    } catch (err) {
+    } catch (err: Error | unknown) {
         console.error(err);
         res.status(500).json({ error: "Error creating chat" });
     }
 };
 
 export const getChatById = async (req: Request, res: Response) => {
-    const userId = await getAuth(req);
+    const userId: string | null = await getAuth(req);
     const { id } = req.params;
 
     if (!userId) return res.status(401).json({ error: "Unauthenticated" });
@@ -54,14 +54,14 @@ export const getChatById = async (req: Request, res: Response) => {
         const chat = await Chat.findOne({ _id: id, userId });
         if (!chat) return res.status(404).json({ error: "Chat not found" });
         res.status(200).json(chat);
-    } catch (err) {
+    } catch (err: Error | unknown) {
         console.error(err);
         res.status(500).json({ error: "Error fetching chat" });
     }
 };
 
 export const updateChat = async (req: Request, res: Response) => {
-    const userId = await getAuth(req);
+    const userId: string | null = await getAuth(req);
     const { id } = req.params;
     const { question, answer, img } = req.body;
 
@@ -80,7 +80,7 @@ export const updateChat = async (req: Request, res: Response) => {
             { $push: { history: { $each: newItems } } }
         );
         res.status(200).json(updated);
-    } catch (err) {
+    } catch (err: Error | unknown) {
         console.error(err);
         res.status(500).json({ error: "Error updating chat" });
     }

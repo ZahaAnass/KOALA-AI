@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const port = process.env.PORT || 3000;
+const port: number | string = process.env.PORT || 3000;
 
 app.listen(port, async () => {
     await connectDB(process.env.MONGO_URI as string);

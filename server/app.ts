@@ -8,12 +8,12 @@ import notFound from "./middleware/not-found.js";
 
 dotenv.config();
 
-const app = express();
+const app: express.Application = express();
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 
-app.get("/", (_, res) => res.send("Backend is running 🚀"));
+app.get("/", (_: express.Request, res: express.Response) => res.send("Backend is running 🚀"));
 
 app.use("/api/chats", chatRoutes);
 app.use("/api/userchats", userChatsRoutes);
