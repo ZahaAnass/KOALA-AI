@@ -242,12 +242,12 @@ KOALA AI est une application de chatbot intelligente développée pour fournir u
 | ---------------------------------- | ------------- | --------- |
 | Analyse des besoins et conception  | 3 jours       | ✅ Terminé |
 | Configuration de l'environnement   | 2 jours       | ✅ Terminé |
-| Développement Frontend (React)     | 8 jours       | Équipe | ✅ Terminé |
-| Développement Backend (Express/TS) | 6 jours       | Équipe | ✅ Terminé |
+| Développement Frontend (React)     | 8 jours       | ✅ Terminé |
+| Développement Backend (Express/TS) | 6 jours       | ✅ Terminé |
 | Intégration services externes      | 4 jours       | ✅ Terminé |
-| Tests et validation                | 3 jours       | 🔄 En cours |
-| Documentation                      | 2 jours       | Chef de | 🔄 En cours |
-| Déploiement et mise en production  | 2 jours       | Chef de | ⏳ À venir |
+| Tests et validation                | 3 jours       | ✅ Terminé |
+| Documentation                      | 2 jours       | 🔄 En cours |
+| Déploiement et mise en production  | 2 jours       | ⏳ À venir |
 
 **Total estimé :** 30 jours
 
