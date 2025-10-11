@@ -40,8 +40,7 @@ function ChatList() {
             <div className="list flex flex-col overflow-scroll">
                 <span className="title font-normal text-xs mb-2.5">RECENT CHATS</span>
                 {isPending ? <p>Loading...</p> 
-                    : error ? <p>Somthing went wrong!</p> 
-                    : data.length === 0 ? <p>No Chats Found</p> 
+                    : error || data.length === 0 ? <p>No Chats Found</p> 
                     : data?.map((chat) => (
                         <Link key={chat._id} to={`/dashboard/chats/${chat._id}`} 
                             className="p-2.5 rounded-[10px] hover:bg-[#2c2937]">
