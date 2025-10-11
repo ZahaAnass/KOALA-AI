@@ -69,12 +69,10 @@ body {
 
 ::-webkit-scrollbar-track {
     background: transparent;
-    /* or use #1e1e1e for dark theme */
 }
 
 ::-webkit-scrollbar-thumb {
     background-color: #555;
-    /* scrollbar color */
     border-radius: 10px;
     border: 2px solid transparent;
 }
