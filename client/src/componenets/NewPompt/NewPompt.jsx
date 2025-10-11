@@ -196,7 +196,7 @@ function NewPompt({ data }) {
       )}
 
       <div className="endChat pb-24" ref={endRef}></div>
-      <form onSubmit={handleSubmit} className="newForm w-1/2 absolute bottom-0 bg-[#2c2937] rounded-[20px] flex items-center gap-5 py-0 px-5">
+      <form onSubmit={handleSubmit} className="newForm w-1/2 absolute bottom-3 bg-[#2c2937] rounded-[20px] flex items-center gap-5 py-0 px-5">
         <Upload setImg={setImg}/>
         <input id="file" type="file" multiple={false} hidden className="flex-1 p-5 border-0 outline-0 bg-transparent text-[#ececec]"/>
         <input type="text" name="text" placeholder="Ask anything" className="flex-1 p-5 border-0 outline-0 bg-transparent text-[#ececec]"/>

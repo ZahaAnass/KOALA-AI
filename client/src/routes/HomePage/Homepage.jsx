@@ -14,8 +14,7 @@ export const HomePage = () => {
                 <h1 className="xl:text-[128px] not-xl:text-6xl bg-gradient-to-r from-[#217bfe] to-[#e55571] bg-clip-text text-transparent">KOALA AI</h1>
                 <h2 className="text-[24px] font-semibold">Supercharge your creativity and productivity</h2>
                 <h3 className="font-normal xl:max-w-3/4 not-xl:max-w-full">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde soluta 
-                    ipsam perferendis harum corporis nam! Quis, iure.
+                    Discover the power of AI-assisted creativity with Koala AI. Transform your ideas and enhance your productivity.
                 </h3>
                 <Link to="/dashboard" className="py-3.5 px-6 text-white bg-[#217bfe] rounded-2xl text-sm mt-5 hover:bg-white hover:text-[#217bfe] transition-colors">
                     Get Started

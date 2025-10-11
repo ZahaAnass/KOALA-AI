@@ -59,7 +59,7 @@ export const DashboardPage = () => {
                 </div>
 
                 {/* Options Cards */}
-                <div className="options w-full mt-10 sm:mt-16 md:mt-20 flex flex-col sm:flex-row items-stretch justify-between gap-4 sm:gap-6 lg:gap-8 xl:gap-12">
+                <div className="options w-full mt-10 sm:mt-16 md:mt-20 flex flex-wrap sm:flex-row items-stretch justify-between gap-4 sm:gap-6 lg:gap-8 xl:gap-12">
                     <div className="option flex flex-col flex-1 gap-2 sm:gap-2.5 font-light text-sm p-4 sm:p-5 border-2 border-solid border-[#555] rounded-[20px] hover:border-[#217bfe] transition-all duration-300 cursor-pointer hover:scale-105">
                         <img
                             className="w-8 h-8 sm:w-10 sm:h-10 object-cover"
