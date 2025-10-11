@@ -15,9 +15,9 @@ L’objectif est de proposer une interface fluide, sécurisée et évolutive, ad
 
 ### Interfaces utilisateur
 
-[Koala AI: Home page](./client/public/Home.png)
-[Koala AI: Chat page](./client/public/Chat.png)
-[Koala AI: Dashboard page](./client/public/Dashboard.png)
+![Koala AI: Home page](./client/public/Home.png)
+![Koala AI: Chat page](./client/public/Chat.png)
+![Koala AI: Dashboard page](./client/public/Dashboard.png)
 
 ---
 
@@ -238,16 +238,16 @@ KOALA AI est une application de chatbot intelligente développée pour fournir u
 
 ## 9. Planification du projet
 
-| Phase                              | Durée estimée | Responsable           | Statut    |
-| ---------------------------------- | ------------- | --------------------- | --------- |
-| Analyse des besoins et conception  | 3 jours       | Anass Zaha            | ✅ Terminé |
-| Configuration de l'environnement   | 2 jours       | Développeur principal | ✅ Terminé |
-| Développement Frontend (React)     | 8 jours       | Équipe dev            | ✅ Terminé |
-| Développement Backend (Express/TS) | 6 jours       | Équipe dev            | ✅ Terminé |
-| Intégration services externes      | 4 jours       | Développeur principal | ✅ Terminé |
-| Tests et validation                | 3 jours       | Testeur               | 🔄 En cours |
-| Documentation                      | 2 jours       | Chef de projet        | 🔄 En cours |
-| Déploiement et mise en production  | 2 jours       | Chef de projet        | ⏳ À venir |
+| Phase                              | Durée estimée | Statut    |
+| ---------------------------------- | ------------- | --------- |
+| Analyse des besoins et conception  | 3 jours       | ✅ Terminé |
+| Configuration de l'environnement   | 2 jours       | ✅ Terminé |
+| Développement Frontend (React)     | 8 jours       | Équipe | ✅ Terminé |
+| Développement Backend (Express/TS) | 6 jours       | Équipe | ✅ Terminé |
+| Intégration services externes      | 4 jours       | ✅ Terminé |
+| Tests et validation                | 3 jours       | 🔄 En cours |
+| Documentation                      | 2 jours       | Chef de | 🔄 En cours |
+| Déploiement et mise en production  | 2 jours       | Chef de | ⏳ À venir |
 
 **Total estimé :** 30 jours
 
