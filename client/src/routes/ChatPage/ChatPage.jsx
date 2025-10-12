@@ -48,6 +48,8 @@ export const ChatPage = () => {
                     <>
                         {message.img && (
                             <IKImage
+                                className="rounded-3xl max-w-[80%]"
+                                style={{alignSelf: "flex-end"}}
                                 urlEndpoint={import.meta.env.VITE_IMAGE_KIT_END_POINT}
                                 path={message.img}
                                 height="300"
