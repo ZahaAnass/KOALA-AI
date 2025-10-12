@@ -19,6 +19,7 @@
     "lucide-react": "^0.545.0",
     "react": "19.0.0-rc-8b08e99e-20240713",
     "react-dom": "19.0.0-rc-8b08e99e-20240713",
+    "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.1",
     "react-type-animation": "^3.2.0"
