@@ -40,7 +40,8 @@ export const ChatPage = () => {
     return (
         <div className="chatPage h-full flex flex-col items-center relative">
             <div className="wrapper flex-1 w-full flex justify-center overflow-scroll">
-                <div className="chat w-1/2 flex flex-col gap-5">
+                <div className="chat w-full sm:w-4/5 md:w-2/3 lg:w-1/2 flex flex-col gap-5 px-2 sm:px-4">
+
                     {/* <div className="message">Test message from ai</div>
                     <div className="message user">Test message from user</div> */}
 
