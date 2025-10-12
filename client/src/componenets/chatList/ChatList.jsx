@@ -32,12 +32,12 @@ function ChatList() {
     })
 
     return (
-        <div className="chatList flex flex-col h-full">
+        <div className="chatList flex flex-col h-full z-10">
             <Link className="p-2.5 rounded-[10px] hover:bg-[#2c2937]" to="/dashboard">Create a new Chat</Link>
             <Link className="p-2.5 rounded-[10px] hover:bg-[#2c2937]" to="/">Explore KOALA AI </Link>
             <Link className="p-2.5 rounded-[10px] hover:bg-[#2c2937]" to="/contact">Contact </Link>
             <hr className="border-0 h-0.5 bg-[#ddd] opacity-10 rounded-[5px] my-5 mx-0"/>
-            <div className="list flex flex-col overflow-scroll">
+            <div className="list flex flex-col max-h-[58vh] overflow-scroll">
                 <span className="title font-normal text-xs mb-2.5">RECENT CHATS</span>
                 {isPending ? <p>Loading...</p> 
                     : error || data.length === 0 ? <p>No Chats Found</p> 
