@@ -9,6 +9,7 @@ import { DashboardPage } from './routes/DashboardPage/DashboardPage'
 import { ChatPage } from './routes/ChatPage/ChatPage'
 import { SignInPage } from './routes/SignIn/SignInPage'
 import { SignUpPage } from './routes/SignUp/SignUpPage'
+import Contact from './routes/ContactPage/Contact'
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <HomePage />
+      },
+      {
+        path: '/contact',
+        element: <Contact />
       },
       {
         element: <DashboardLayout />,
