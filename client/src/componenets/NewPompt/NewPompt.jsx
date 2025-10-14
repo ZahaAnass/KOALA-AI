@@ -6,6 +6,7 @@ import { config, genAI } from "../../lib/gemini";
 import Markdown from "react-markdown";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowBigDown } from "lucide-react"
 
 function NewPompt({ data }) {
   const [question, setQuestion] = useState("")
@@ -16,6 +17,8 @@ function NewPompt({ data }) {
     dbData:{},
     aiData:{}
   })
+
+  const [isButtonActive, setIsButtonActive] = useState(true)
 
   const endRef = useRef(null);
 
@@ -172,6 +175,19 @@ function NewPompt({ data }) {
 
   return (
     <>
+      {img.dbData?.filePath && (
+          <IKImage
+            className="rounded-3xl max-w-[80%]"
+            style={{alignSelf: "flex-end"}}
+            urlEndpoint={import.meta.env.VITE_IMAGE_KIT_END_POINT}
+            path={img.dbData?.filePath}
+            height="300"
+            width="400"
+            transformation={[{ height: "300", width: "400" }]}
+            loading="lazy"
+            lqip={{ active: true , quality: 20}}
+          />
+      )}
       {question && (
         <div className="message user">
           <p>{question}</p>
@@ -186,19 +202,19 @@ function NewPompt({ data }) {
       {img.isLoading && (
         <div className="">Loading...</div>
       )}
-      {img.dbData?.filePath && (
-        <IKImage
-          urlEndpoint={import.meta.env.VITE_IMAGE_KIT_END_POINT}
-          path={img.dbData?.filePath}
-          width={380}
-          quality={100}
-        />
-      )}
 
       <div className="endChat pb-24" ref={endRef}></div>
+
+      {isButtonActive && <button
+        className="flex items-center gap-2 fixed bottom-[15%] left-1/2 -translate-x-1/2 ml-5"
+        onClick={() => endRef.current.scrollIntoView({ behavior: "smooth" })}
+      >
+        <ArrowBigDown className="w-6 h-6" />
+      </button>}
+
       <form
         onSubmit={handleSubmit}
-        className="newForm w-full mx-auto -mt-26 
+        className="newForm w-full mx-auto -mt-26
                   bg-[#2c2937] rounded-2xl flex items-center gap-4 py-2 px-4 
                   border border-[#3b3846] shadow-md 
                   focus-within:border-[#7f7aff] transition-all"
@@ -216,6 +232,7 @@ function NewPompt({ data }) {
           type="text"
           name="text"
           placeholder="Ask anything..."
+          autoComplete="off"
           className="flex-1 p-3 border-0 outline-0 bg-transparent text-[#ececec] 
                     placeholder:text-[#9b98a3] text-sm"
         />
