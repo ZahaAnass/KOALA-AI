@@ -28,10 +28,6 @@ const router = createBrowserRouter([
         element: <HomePage />
       },
       {
-        path: '/contact',
-        element: <Contact />
-      },
-      {
         element: <DashboardLayout />,
         children: [
           {
@@ -41,6 +37,10 @@ const router = createBrowserRouter([
           {
             path: "dashboard/chats/:id",
             element: <ChatPage />
+          },
+          {
+            path: '/contact',
+            element: <Contact />
           }
         ]
       }
