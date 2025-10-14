@@ -36,7 +36,7 @@ function Contact() {
                         <a 
                             href="https://github.com/Zahaanass" 
                             target="_blank" 
-                            rel="noopener noreferrer"
+                            rel="github profile"
                             className="text-purple-400 hover:text-purple-300 transition-colors duration-300 font-medium"
                         >
                             github.com/Zahaanass
@@ -53,7 +53,7 @@ function Contact() {
                         <a 
                             href="https://www.linkedin.com/in/zaha-anas-101796334/" 
                             target="_blank" 
-                            rel="noopener noreferrer"
+                            rel="github profile"
                             className="text-purple-400 hover:text-purple-300 transition-colors duration-300 font-medium"
                         >
                             linkedin.com/in/zahaanas
