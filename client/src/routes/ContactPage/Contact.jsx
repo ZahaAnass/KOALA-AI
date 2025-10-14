@@ -19,10 +19,10 @@ function Contact() {
                         <h2 className="text-xl font-semibold text-white mb-2">Email</h2>
                         <p className="text-gray-400 mb-4 text-center">For general inquiries and support</p>
                         <a 
-                            href="mailto:contact@koala-ai.com" 
+                            href="mailto:zahaanass277@gmail.com" 
                             className="text-purple-400 hover:text-purple-300 transition-colors duration-300 font-medium"
                         >
-                            contact@koala-ai.com
+                            zahaanass277@gmail.com
                         </a>
                     </div>
                     
@@ -34,12 +34,12 @@ function Contact() {
                         <h2 className="text-xl font-semibold text-white mb-2">GitHub</h2>
                         <p className="text-gray-400 mb-4 text-center">Check out our open source repositories</p>
                         <a 
-                            href="https://github.com/anasszahaf" 
+                            href="https://github.com/Zahaanass" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-purple-400 hover:text-purple-300 transition-colors duration-300 font-medium"
                         >
-                            github.com/anasszahaf
+                            github.com/Zahaanass
                         </a>
                     </div>
                     
@@ -51,12 +51,12 @@ function Contact() {
                         <h2 className="text-xl font-semibold text-white mb-2">LinkedIn</h2>
                         <p className="text-gray-400 mb-4 text-center">Connect with us professionally</p>
                         <a 
-                            href="https://linkedin.com/in/anass-zaha" 
+                            href="https://www.linkedin.com/in/zaha-anas-101796334/" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-purple-400 hover:text-purple-300 transition-colors duration-300 font-medium"
                         >
-                            linkedin.com/in/anass-zaha
+                            linkedin.com/in/zahaanas
                         </a>
                     </div>
                 </div>
