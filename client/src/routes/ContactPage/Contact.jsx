@@ -3,8 +3,8 @@ import './Contact.css';
 
 function Contact() {
     return (
-        <div className="min-h-screen p-6 flex flex-col items-center justify-center bg-[#12101b]">
-            <div className="w-full max-w-6xl">
+        <div className="min-h-5/6 p-6 bg-[#12101b] overflow-y-auto flex flex-col items-center py-20">
+            <div className="max-w-6xl w-full flex flex-col items-center justify-center">
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">Contact Us</h1>
                 <p className="text-gray-300 text-lg mb-12 text-center max-w-2xl mx-auto">
                     Have questions about KOALA AI? We&apos;re here to help. Reach out through any of these channels.
