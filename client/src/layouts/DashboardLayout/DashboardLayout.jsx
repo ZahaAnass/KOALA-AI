@@ -29,7 +29,7 @@ export const DashboardLayout = () => {
                     </button>
                 </div>
             </div>
-            <div className="content flex-4 bg-[#12101b]">
+            <div className="content flex-4 bg-[#12101b] overflow-y-auto">
                 <Outlet />
             </div>
         </div>
