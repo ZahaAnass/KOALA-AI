@@ -20,6 +20,8 @@ function Contact() {
                         <p className="text-gray-400 mb-4 text-center">For general inquiries and support</p>
                         <a 
                             href="mailto:zahaanass277@gmail.com" 
+                            target="_blank"
+                            rel='email'
                             className="text-purple-400 hover:text-purple-300 transition-colors duration-300 font-medium"
                         >
                             zahaanass277@gmail.com
