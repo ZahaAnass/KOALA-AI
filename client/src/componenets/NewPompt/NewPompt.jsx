@@ -21,6 +21,8 @@ function NewPompt({ data }) {
 
   const { showScrollButton, setShowScrollButton } = useOutletContext();
 
+  
+
   const endRef = useRef(null);
 
   const chat = genAI.chats.create({

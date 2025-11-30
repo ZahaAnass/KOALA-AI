@@ -2,16 +2,44 @@ import NewPompt from "../../componenets/NewPompt/NewPompt";
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@clerk/clerk-react"
 import "./ChatPage.css"
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import Markdown from "react-markdown";
 import { IKImage } from "imagekitio-react";
+import { useEffect, useRef } from "react";
 
 export const ChatPage = () => {
 
     const path = useLocation().pathname
     const chatId = path.split("/").pop()
 
+    const wrapperRef = useRef(null);
+    const { showScrollButton, setShowScrollButton } = useOutletContext();
+
     const { getToken } = useAuth()
+
+    useEffect(() => {
+        const wrapper = wrapperRef.current;
+        if (!wrapper) return;
+    
+        const handleScroll = () => {
+            const scrollTop = wrapper.scrollTop;
+            const scrollHeight = wrapper.scrollHeight;
+            const clientHeight = wrapper.clientHeight;
+    
+            const isAtBottom = scrollHeight - clientHeight - scrollTop < 10;
+    
+            if (!isAtBottom && scrollTop > 60) {
+                setShowScrollButton(true);
+            } else {
+                setShowScrollButton(false);
+            }
+        };
+    
+        wrapper.addEventListener("scroll", handleScroll);
+    
+        return () => wrapper.removeEventListener("scroll", handleScroll);
+    }, []);
+    
 
     const { isPending, error, data } = useQuery({
         queryKey: ['chat', chatId],
@@ -39,7 +67,7 @@ export const ChatPage = () => {
 
     return (
         <div className="chatPage h-full flex flex-col items-center relative">
-            <div className="wrapper flex-1 w-full flex justify-center overflow-scroll">
+            <div ref={wrapperRef} className="wrapper flex-1 w-full flex justify-center overflow-scroll">
                 <div className="chat w-full sm:w-4/5 md:w-2/3 lg:w-1/2 flex flex-col gap-5 px-2 sm:px-4 relative">
 
                     {/* <div className="message">Test message from ai</div>
