@@ -10,6 +10,7 @@ export const DashboardLayout = () => {
     const navigate = useNavigate();
 
     const [isOpen, setIsOpen] = useState(false);
+    const [showScrollButton, setShowScrollButton] = useState(true)
 
     useEffect(() => {
         if (isLoaded && !userId) {
@@ -24,13 +25,16 @@ export const DashboardLayout = () => {
             <div className={`menu ${isOpen ? "max-w-[250px]" : "w-0"} transition-all duration-500 ease-in-out`}>
                 <div className={`flex flex-row ${isOpen ? "w-full" : "w-0"}`}>
                     {isOpen && <ChatList />}
-                    <button onClick={() => setIsOpen(!isOpen)} className="menuButton flex h-11 hover:bg-gray-800 rounded-[10px] p-2">
+                    <button onClick={() => {
+                        setIsOpen(!isOpen)
+                        setShowScrollButton(false)
+                    }} className="menuButton flex h-11 hover:bg-gray-800 rounded-[10px] p-2">
                         {isOpen ? <X className=" w-6 h-6" /> : <TextAlignJustify className="w-6 h-6" />}
                     </button>
                 </div>
             </div>
             <div className="content flex-4 bg-[#12101b] overflow-y-auto">
-                <Outlet />
+                <Outlet context={{ showScrollButton, setShowScrollButton }}/>
             </div>
         </div>
     )

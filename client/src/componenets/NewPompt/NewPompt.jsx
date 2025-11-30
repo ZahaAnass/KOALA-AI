@@ -7,6 +7,7 @@ import Markdown from "react-markdown";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowBigDown } from "lucide-react"
+import { useOutletContext } from "react-router-dom";
 
 function NewPompt({ data }) {
   const [question, setQuestion] = useState("")
@@ -18,7 +19,7 @@ function NewPompt({ data }) {
     aiData:{}
   })
 
-  const [isButtonActive, setIsButtonActive] = useState(true)
+  const { showScrollButton, setShowScrollButton } = useOutletContext();
 
   const endRef = useRef(null);
 
@@ -203,10 +204,10 @@ function NewPompt({ data }) {
         <div className="">Loading...</div>
       )}
 
-      <div className="endChat pb-24" ref={endRef}></div>
+      <div className="endChat pb-24 relative" ref={endRef}></div>
 
-      {isButtonActive && <button
-        className="flex items-center gap-2 fixed bottom-[15%] left-1/2 -translate-x-1/2 ml-5"
+      {showScrollButton && <button
+        className="flex items-center gap-2 fixed bottom-[15%] left-1/2 -translate-x-1/2 ml-5 bg-[#2c2937] rounded-full p-2 hover:bg-[#3b3846] transition-all duration-300 active:scale-80 active:bg-[#3b3846]"
         onClick={() => endRef.current.scrollIntoView({ behavior: "smooth" })}
       >
         <ArrowBigDown className="w-6 h-6" />
@@ -217,7 +218,7 @@ function NewPompt({ data }) {
         className="newForm w-full mx-auto -mt-26
                   bg-[#2c2937] rounded-2xl flex items-center gap-4 py-2 px-4 
                   border border-[#3b3846] shadow-md 
-                  focus-within:border-[#7f7aff] transition-all"
+                  focus-within:border-[#7f7aff] transition-all bottom-0 z-20"
       >
         <Upload setImg={setImg} />
 
