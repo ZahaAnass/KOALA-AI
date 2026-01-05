@@ -1,308 +1,236 @@
-# Cahier des Charges Logiciel
+# KOALA AI 🐨
 
-## 1. Informations générales
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
+[![React Version](https://img.shields.io/badge/react-19.0.0--rc-blue)](https://react.dev)
 
-**Titre du projet : Koala Ai**  
-**Chef de projet : Anass Zaha**  
-**Date : 11/10/2025**
-**Version : 1.0**
+A modern AI chatbot application powered by Google Gemini, featuring real-time conversations, image analysis, and a beautiful user interface.
 
-## Résumé exécutif
+## 📸 Screenshots
 
-KOALA AI est une application web d’intelligence artificielle visant à offrir une expérience de chat avancée entre l’utilisateur et un modèle IA (Google Gemini).  
-Le projet repose sur une architecture client-serveur moderne (React + Node.js + MongoDB) et intègre des services tiers tels que Clerk pour l’authentification et ImageKit pour la gestion des médias.  
-L’objectif est de proposer une interface fluide, sécurisée et évolutive, adaptée aux besoins des utilisateurs professionnels et grand public.
+![Home Page](./client/public/Home.png)
+![Chat Interface](./client/public/Chat.png)
+![Dashboard](./client/public/Dashboard.png)
 
-### Interfaces utilisateur
+## ✨ Features
 
-![Koala AI: Home page](./client/public/Home.png)
-![Koala AI: Chat page](./client/public/Chat.png)
-![Koala AI: Dashboard page](./client/public/Dashboard.png)
+- 🤖 **AI-Powered Conversations** - Chat with Google Gemini AI in real-time
+- 🖼️ **Image Analysis** - Upload and analyze images with AI
+- 🔐 **Secure Authentication** - User authentication powered by Clerk
+- 💾 **Persistent History** - All conversations are saved and accessible
+- 📱 **Responsive Design** - Modern UI built with TailwindCSS
+- ⚡ **Fast & Efficient** - Built with React 19 and Vite
 
----
+## 🛠️ Tech Stack
 
-## 2. Introduction
+### Frontend
+- **React 19 (RC)** - UI framework
+- **React Router DOM v7** - Routing
+- **TailwindCSS v4** - Styling
+- **Vite** - Build tool
+- **Clerk** - Authentication
+- **TanStack React Query** - Data fetching and caching
+- **React Markdown** - Message formatting
+- **ImageKit** - Image hosting and optimization
 
-### 2.1 Contexte
+### Backend
+- **Node.js 18+** - Runtime
+- **Express.js** - Web framework
+- **TypeScript** - Type safety
+- **MongoDB** - Database
+- **Mongoose** - ODM
+- **Clerk SDK** - Authentication
+- **Google Generative AI** - AI integration
 
-KOALA AI est une application de chatbot intelligente développée pour fournir une interface conversationnelle avancée utilisant l'intelligence artificielle. Le projet répond au besoin croissant d'assistants IA personnalisés capables de comprendre et de répondre à des requêtes variées, incluant l'analyse d'images et la génération de contenu.
+## 📋 Prerequisites
 
-### 2.2 Objectifs
+Before you begin, ensure you have the following installed:
+- Node.js 18 or higher
+- npm or yarn
+- MongoDB (local or MongoDB Atlas account)
 
-- Créer un chatbot IA conversationnel intuitif et performant
-- Permettre l'upload et l'analyse d'images via IA
-- Offrir une expérience utilisateur moderne et responsive
-- Gérer l'historique des conversations de manière persistante
-- Fournir une authentification sécurisée des utilisateurs
+You'll also need accounts for:
+- [Clerk](https://clerk.com) - For authentication
+- [ImageKit](https://imagekit.io) - For image hosting
+- [Google AI Studio](https://makersuite.google.com/app/apikey) - For Gemini API key
 
-### 2.3 Portée du projet
+## 🚀 Quick Start
 
-**Fonctionnalités incluses :**
-- Interface de chat en temps réel avec IA (Google Gemini)
-- Authentification utilisateur (Clerk)
-- Upload et analyse d'images (ImageKit)
-- Historique des conversations
-- Interface responsive moderne
+### 1. Clone the repository
 
-**Fonctionnalités non prévues dans cette version :**
-- Chat vocal/audio
-- Intégration avec d'autres modèles IA
-- Fonctionnalités collaboratives multi-utilisateurs
-
----
-
-## 3. Présentation générale
-
-- **Type d’application :** Application Web Progressive (SPA)
-- **Utilisateurs cibles :** Administrateurs, utilisateurs authentifiés, visiteurs
-- **Environnement technique prévu :** Navigateurs modernes, desktop et mobile
-- **Technologies principales :** React, Node.js, Express, MongoDB, TailwindCSS, Clerk, ImageKit, Google Gemini AI
-
----
-
-## 4. Fonctionnalités principales
-
-1. **Authentification sécurisée** (Clerk Authentication)
-   - Connexion / Inscription
-   - Gestion des sessions utilisateur
-   
-2. **Interface de chat IA conversationnelle**
-   - Communication en temps réel avec Google Gemini AI
-   - Streaming des réponses
-   - Formatage Markdown des messages
-   
-3. **Gestion des conversations**
-   - Création de nouvelles conversations
-   - Historique des chats persistant
-   - Titre automatique des conversations
-   
-4. **Upload et analyse d'images**
-   - Upload d'images via ImageKit
-   - Analyse d'images par IA
-   - Prévisualisation des images uploadées
-   
-5. **Tableau de bord utilisateur**
-   - Vue d'ensemble des conversations récentes
-   - Accès rapide aux fonctionnalités
-   - Interface moderne et intuitive
-
----
-
-## 5. Exigences fonctionnelles
-
-- Le système doit permettre à un utilisateur de créer un compte.
-- L’administrateur peut consulter et modifier les informations des utilisateurs.
-- L’utilisateur peut télécharger ses rapports au format PDF.
-
-### 5.1 Authentification et gestion utilisateur
-- L'utilisateur peut se créer un compte via Clerk
-- L'utilisateur peut se connecter/déconnecter de manière sécurisée
-- L'accès au tableau de bord nécessite une authentification
-
-### 5.2 Fonctionnalités de chat
-- L'utilisateur peut créer une nouvelle conversation
-- L'utilisateur peut poser des questions à l'IA et recevoir des réponses en temps réel
-- Le système doit sauvegarder automatiquement l'historique des conversations
-- L'utilisateur peut accéder à ses conversations précédentes
-
-### 5.3 Gestion des images
-- L'utilisateur peut uploader des images (formats : PNG, JPG, JPEG)
-- L'IA doit pouvoir analyser et commenter les images uploadées
-- Les images doivent être stockées de manière sécurisée via ImageKit
-
-### 5.4 Interface utilisateur
-- L'interface doit être responsive et s'adapter aux différents appareils
-- Les messages doivent être formatés en Markdown
-- L'utilisateur doit pouvoir naviguer entre les différentes conversations :** Application Web Progressive (SPA)
-- **Utilisateurs cibles :** 
-  - Utilisateurs finaux cherchant un assistant IA
-  - Développeurs et créateurs de contenu
-  - Professionnels nécessitant une analyse d'images IA
-- **Environnement technique prévu :** 
-  - Navigateurs modernes (Chrome, Firefox, Safari, Edge)
-  - Appareils desktop et mobiles
-  - Compatible avec les systèmes d'exploitation principauxons générales
-
----
-
-## 6. Exigences non fonctionnelles
-
-### 6.1 Performance
-- Temps de réponse de l'IA inférieur à 5 secondes
-- Streaming des réponses pour une expérience fluide
-- Chargement initial de l'application inférieur à 3 secondes
-
-### 6.2 Sécurité
-- Authentification sécurisée via Clerk (OAuth, JWT)
-- Validation des tokens d'authentification côté serveur
-- Sécurisation des uploads d'images via ImageKit
-- Protection CORS configurée
-
-### 6.3 Compatibilité
-- Compatible avec les navigateurs modernes (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
-
-### 6.4 Utilisabilité
-- Interface intuitive et moderne avec TailwindCSS
-- Navigation fluide entre les pages
-- Animations et transitions pour améliorer l'UX
-
----
-
-## 7. Contraintes techniques
-
-### 7.1 Frontend
-- **Framework :** React 19 (RC)
-- **Routing :** React Router DOM v7
-- **Styling :** TailwindCSS v4
-- **Build Tool :** Vite
-- **Authentification :** Clerk React
-- **State Management :** TanStack React Query (pour la gestion du cache)
-- **Autres :** React Type Animation, React Markdown
-
-### 7.2 Backend
-- **Runtime :** Node.js avec TypeScript
-- **Framework :** Express.js
-- **Base de données :** MongoDB avec Mongoose
-- **Authentification :** Clerk SDK Node
-- **Upload d'images :** ImageKit
-- **IA :** Google Generative AI (Gemini)
-
-### 7.3 Infrastructure et services externes
-- **Hébergement d'images :** ImageKit
-- **Service IA :** Google Gemini API
-- **Authentification :** Clerk Authentication Service
-- **Base de données :** MongoDB Atlas (recommandé)
-
-### 7.4 Variables d'environnement requises
-- `VITE_CLERK_PUBLISHABLE_KEY`
-- `VITE_IMAGE_KIT_END_POINT`, `VITE_IMAGE_KIT_PUBLIC_KEY`
-- `VITE_GEMINI_PUBLIC_KEY`
-- `MONGO_URI`, `CLIENT_URL`
-- `IMAGE_KIT_PRIVATE_KEY`
-
----
-
-## 8. Modèles et diagrammes
-
-- Diagramme des cas d’utilisation
-- Diagramme de classes UML
-- Maquettes de l’interface utilisateur
-
-### 8.1 Architecture système
-- **Architecture :** Client-Serveur (SPA + API REST)
-- **Frontend :** React SPA servie par Vite
-- **Backend :** API REST avec Express.js et TypeScript
-- **Base de données :** MongoDB (NoSQL)
-
-### 8.2 Modèles de données
-
-**Chat Model :**
-```typescript
-{
-  userId: string,
-  history: [
-    {
-      role: "user" | "model",
-      parts: [{ text: string }],
-      img?: string
-    }
-  ],
-  timestamps: Date
-}
-```
-
-**UserChats Model :**
-```typescript
-{
-  userId: string,
-  chats: [
-    {
-      _id: string,
-      title: string,
-      createAt: Date
-    }
-  ],
-  timestamps: Date
-}
-```
-
-### 8.3 Routes API
-- `POST /api/chats` - Créer un nouveau chat
-- `GET /api/chats/:id` - Récupérer un chat spécifique
-- `PUT /api/chats/:id` - Mettre à jour un chat
-- `GET /api/userchats` - Récupérer tous les chats d'un utilisateur
-- `GET /api/upload` - Authentification pour upload d'imagesdoit permettre à un utilisateur de créer un compte via ImageKit
-- L'utilisateur peut se connecter/déconnecter de manière sécurisée
-- L'accès au tableau de bord nécessite une authentification
----
-
-## 9. Planification du projet
-
-| Phase                              | Durée estimée | Statut    |
-| ---------------------------------- | ------------- | --------- |
-| Analyse des besoins et conception  | 3 jours       | ✅ Terminé |
-| Configuration de l'environnement   | 2 jours       | ✅ Terminé |
-| Développement Frontend (React)     | 8 jours       | ✅ Terminé |
-| Développement Backend (Express/TS) | 6 jours       | ✅ Terminé |
-| Intégration services externes      | 4 jours       | ✅ Terminé |
-| Tests et validation                | 3 jours       | ✅ Terminé |
-| Documentation                      | 2 jours       | 🔄 En cours |
-| Déploiement et mise en production  | 2 jours       | ⏳ À venir |
-
-**Total estimé :** 30 jours
-
----
-
-## 10. Livrables attendus
-
-### 10.1 Livrables techniques
-- ✅ Code source complet du projet (Frontend React + Backend Express/TS)
-- ✅ Configuration des services externes (Clerk, ImageKit, Google Gemini)
-- ✅ Base de données MongoDB avec modèles définis
-- ✅ API REST documentée et fonctionnelle
-
-### 10.2 Documentation
-- ✅ README avec instructions d'installation
-- ✅ Cahier des charges technique
-- 🔄 Documentation API (Swagger/OpenAPI)
-- ⏳ Manuel utilisateur
-- ⏳ Guide de déploiement
-
-### 10.3 Environnements
-- ✅ Environnement de développement configuré
-- 🔄 Environnement de staging/test
-- ⏳ Environnement de production
-
----
-
-## 11. Validation et tests
-
-### 11.1 Critères d'acceptation
-- ✅ Authentification utilisateur fonctionnelle
-- ✅ Interface de chat responsive et intuitive
-- ✅ Intégration IA (Google Gemini) opérationnelle
-- ✅ Upload et analyse d'images fonctionnels
-- ✅ Sauvegarde persistante des conversations
-- 🔄 Performance conformes aux exigences
-- ⏳ Tests de sécurité validés
-
----
-
-## Annexes
-
-### A. Configuration requise
-- Node.js 18+ 
-- MongoDB 5+
-- Comptes configurés : Clerk, ImageKit, Google AI
-
-### B. Scripts de développement
 ```bash
-# Frontend (client)
-npm run dev    # Serveur de développement
-npm run build  # Build de production
-
-# Backend (server)  
-npm run dev    # Serveur avec hot-reload
-npm run build  # Compilation TypeScript
-npm start      # Production
+git clone https://github.com/ZahaAnass/KOALA-AI.git
+cd KOALA-AI
 ```
+
+### 2. Set up the Backend
+
+```bash
+cd server
+npm install
+```
+
+Create a `.env` file in the server directory:
+
+```env
+# ImageKit Configuration
+IMAGE_KIT_END_POINT=your_imagekit_endpoint
+IMAGE_KIT_PUBLIC_KEY=your_imagekit_public_key
+IMAGE_KIT_PRIVATE_KEY=your_imagekit_private_key
+
+# Server Configuration
+CLIENT_URL=http://localhost:5173
+
+# MongoDB Configuration
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/koala-ai?retryWrites=true&w=majority
+
+# Clerk Configuration
+CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+The server will start on `http://localhost:3000`
+
+### 3. Set up the Frontend
+
+Open a new terminal and navigate to the client directory:
+
+```bash
+cd client
+npm install
+```
+
+Create a `.env` file in the client directory:
+
+```env
+# Clerk Configuration
+VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+
+# ImageKit Configuration
+VITE_IMAGE_KIT_END_POINT=your_imagekit_endpoint
+VITE_IMAGE_KIT_PUBLIC_KEY=your_imagekit_public_key
+
+# Google Gemini Configuration
+VITE_GEMINI_PUBLIC_KEY=your_gemini_api_key
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+The app will open at `http://localhost:5173`
+
+## 🔧 Configuration
+
+### Clerk Setup
+1. Create an account at [Clerk](https://clerk.com)
+2. Create a new application
+3. Copy the Publishable Key and Secret Key
+4. Add `http://localhost:5173` to allowed origins
+
+### ImageKit Setup
+1. Create an account at [ImageKit](https://imagekit.io)
+2. Get your URL endpoint, Public Key, and Private Key from the dashboard
+3. Add the keys to your environment files
+
+### Google Gemini API Setup
+1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Create an API key
+3. Add it to your client `.env` file
+
+### MongoDB Setup
+1. Create a MongoDB Atlas account or use a local MongoDB instance
+2. Create a new cluster (for Atlas)
+3. Create a database user with read/write permissions
+4. Get your connection string
+5. Replace `username`, `password`, and `cluster` in the MONGO_URI
+
+## 📦 Building for Production
+
+### Build the Backend
+
+```bash
+cd server
+npm run build
+npm start
+```
+
+### Build the Frontend
+
+```bash
+cd client
+npm run build
+```
+
+The built files will be in the `dist` directory.
+
+## 📖 API Documentation
+
+### Endpoints
+
+#### Chat Routes
+- `POST /api/chats` - Create a new chat
+- `GET /api/chats/:id` - Get a specific chat
+- `PUT /api/chats/:id` - Update a chat
+
+#### User Chats Routes
+- `GET /api/userchats` - Get all chats for the authenticated user
+
+#### Upload Routes
+- `GET /api/upload` - Get ImageKit authentication parameters
+
+For detailed API documentation, see [API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](./CONTRIBUTING.md) before submitting a pull request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Google Gemini](https://deepmind.google/technologies/gemini/) - AI capabilities
+- [Clerk](https://clerk.com) - Authentication solution
+- [ImageKit](https://imagekit.io) - Image management
+- [MongoDB](https://www.mongodb.com) - Database solution
+
+## 👤 Author
+
+**Anass Zaha**
+
+- GitHub: [@ZahaAnass](https://github.com/ZahaAnass)
+
+## 📞 Support
+
+If you have any questions or need help, please:
+- Open an issue on GitHub
+- Check the [documentation](./docs)
+- Review the [FAQ](./docs/FAQ.md)
+
+## 🗺️ Roadmap
+
+- [ ] Voice/audio chat support
+- [ ] Multi-model AI support
+- [ ] Collaborative features
+- [ ] Mobile applications
+- [ ] Enhanced analytics dashboard
+
+---
+
+Made with ❤️ by Anass Zaha
