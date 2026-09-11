@@ -98,7 +98,14 @@ export async function streamAnswer(req: Request, res: Response, params: RunParam
     const tools = Boolean(options.tools ?? settings.tools) && model.supportsTools && !webSearch;
     const useDocuments = Boolean(options.useDocuments ?? settings.useDocuments);
 
-    sse.send("meta", { model: model.id, webSearch, tools, useDocuments });
+    sse.send("meta", {
+      chatId: String(chat._id),
+      userMessageId: String(userMsg._id),
+      model: model.id,
+      webSearch,
+      tools,
+      useDocuments,
+    });
 
     const { history, summary, summarizedUpTo } = await buildHistory(chat, params.userMessageIndex);
 
@@ -206,6 +213,7 @@ export async function streamAnswer(req: Request, res: Response, params: RunParam
     }
 
     sse.send("done", {
+      chatId: String(chat._id),
       message: { ...modelMessage, _id: String(modelMessage._id) },
       title,
       followUps,
