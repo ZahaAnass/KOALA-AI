@@ -17,8 +17,11 @@ const MAX_CHUNKS = 400;
 export async function extractText(buffer: Buffer, mimeType: string, fileName: string): Promise<string> {
   const ext = fileName.toLowerCase().split(".").pop() ?? "";
   if (mimeType === "application/pdf" || ext === "pdf") {
-    const parsed = await pdfParse(buffer);
-    return parsed.text;
+    try {
+      return (await pdfParse(buffer)).text;
+    } catch {
+      throw badRequest("Could not read this PDF. Make sure the file is not corrupted or password protected.");
+    }
   }
   if (ALLOWED_DOC_TYPES.has(mimeType) || ["txt", "md", "csv", "json"].includes(ext)) {
     return buffer.toString("utf8");

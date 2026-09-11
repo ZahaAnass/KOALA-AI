@@ -14,8 +14,9 @@ const messageSchema = {
     sources: { type: "array", items: { $ref: "#/components/schemas/Source" } },
     toolCalls: { type: "array", items: { type: "object" } },
     model: { type: "string" },
-    feedback: { type: "string", enum: ["up", "down"], nullable: true },
+    feedback: { type: ["string", "null"], enum: ["up", "down", null] },
     usage: { $ref: "#/components/schemas/Usage" },
+    feedbackNote: { type: "string" },
     edited: { type: "boolean" },
     createdAt: { type: "string", format: "date-time" },
   },
@@ -32,7 +33,7 @@ const sendMessageBody = {
 
 const sseResponse = {
   description:
-    "Server-Sent Events stream. Events: `meta` {model, webSearch, tools, useDocuments}, `chunk` {text}, `sources` {sources[]}, `tool` {name,args,result}, `done` {message, title, followUps[], usage}, `error` {message}. Close the connection to stop generation.",
+    "Server-Sent Events stream. Events: `meta` {chatId, userMessageId, model, webSearch, tools, useDocuments}, `chunk` {text}, `sources` {sources[]}, `tool` {name,args,result}, `done` {chatId, message, title, followUps[], usage}, `error` {message}. Close the connection to stop generation.",
   content: { "text/event-stream": { schema: { type: "string" } } },
 };
 
@@ -90,7 +91,7 @@ export const openapi = {
           archived: { type: "boolean" },
           tags: { type: "array", items: { type: "string" } },
           folder: { type: "string" },
-          shareToken: { type: "string", nullable: true },
+          shareToken: { type: ["string", "null"] },
           messageCount: { type: "integer" },
           lastMessageAt: { type: "string", format: "date-time" },
           snippet: { type: "string" },
@@ -135,7 +136,7 @@ export const openapi = {
           role: { type: "string", enum: ["user", "admin"] },
           onboarded: { type: "boolean" },
           settings: { $ref: "#/components/schemas/Settings" },
-          quota: { type: "object", properties: { limit: { type: "integer", nullable: true }, usedToday: { type: "integer" }, remaining: { type: "integer", nullable: true } } },
+          quota: { type: "object", properties: { limit: { type: ["integer", "null"] }, usedToday: { type: "integer" }, remaining: { type: ["integer", "null"] } } },
         },
       },
       PromptTemplate: { type: "object", properties: { _id: { type: "string" }, title: { type: "string" }, content: { type: "string" }, category: { type: "string" }, icon: { type: "string" }, builtin: { type: "boolean" } } },
@@ -239,7 +240,7 @@ export const openapi = {
         security: bearer,
         summary: "Rate an answer",
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }, { name: "messageId", in: "path", required: true, schema: { type: "string" } }],
-        requestBody: { content: { "application/json": { schema: { type: "object", properties: { feedback: { type: "string", enum: ["up", "down"], nullable: true }, note: { type: "string" } } } } } },
+        requestBody: { content: { "application/json": { schema: { type: "object", properties: { feedback: { type: ["string", "null"], enum: ["up", "down", null] }, note: { type: "string" } } } } } },
         responses: { 200: { description: "OK" } },
       },
     },
@@ -254,7 +255,7 @@ export const openapi = {
     },
     "/api/chats/{id}/share": {
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      post: { tags: ["Share"], security: bearer, summary: "Create a public read-only link", responses: { 200: { description: "{ shareToken }" } } },
+      post: { tags: ["Share"], security: bearer, summary: "Create a public read-only link", responses: { 200: { description: "{ shareToken, sharedAt }" } } },
       delete: { tags: ["Share"], security: bearer, summary: "Revoke the public link", responses: { 204: { description: "Revoked" } } },
     },
     "/api/share/{token}": {

@@ -47,25 +47,6 @@ export function EmptyState({ icon, title, description, action, className }: { ic
   );
 }
 
-/** Lightweight CSS-only tooltip. Wrap any focusable element. */
-export function Tooltip({ label, children, side = "top", className }: { label: string; children: ReactNode; side?: "top" | "bottom"; className?: string }) {
-  return (
-    <span className={cn("group/tip relative inline-flex", className)}>
-      {children}
-      <span
-        role="tooltip"
-        className={cn(
-          "pointer-events-none absolute left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-md bg-fg px-2 py-1 text-[11px] font-medium text-bg opacity-0 transition-opacity",
-          "group-hover/tip:opacity-100 group-focus-within/tip:opacity-100",
-          side === "top" ? "bottom-full mb-1.5" : "top-full mt-1.5",
-        )}
-      >
-        {label}
-      </span>
-    </span>
-  );
-}
-
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">

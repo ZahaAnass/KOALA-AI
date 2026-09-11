@@ -17,14 +17,13 @@ export default function DashboardPage() {
   const { send, stop, streaming } = useChatStream();
   const active = useChatStore((s) => s.active);
   const insert = useUi((s) => s.insertIntoComposer);
-  const setOptions = useChatStore((s) => s.setOptions);
 
   const firstName = user?.name?.split(" ")[0];
   const suggestions = t("dashboard.suggestions", { returnObjects: true }) as string[];
   const cards = [
     { key: "chat", icon: <MessageSquare />, tone: "text-brand-500 bg-brand-500/10", onClick: () => insert("") },
-    { key: "image", icon: <ImageIcon />, tone: "text-accent-500 bg-accent-500/10", onClick: () => insert("Describe what you see in this image: ") },
-    { key: "code", icon: <Code2 />, tone: "text-emerald-500 bg-emerald-500/10", onClick: () => insert("Help me with this code:\n\n```\n\n```") },
+    { key: "image", icon: <ImageIcon />, tone: "text-accent-500 bg-accent-500/10", onClick: () => insert(t("dashboard.inserts.image")) },
+    { key: "code", icon: <Code2 />, tone: "text-emerald-500 bg-emerald-500/10", onClick: () => insert(t("dashboard.inserts.code")) },
     { key: "docs", icon: <FileText />, tone: "text-amber-500 bg-amber-500/10", onClick: () => navigate("/documents") },
   ] as const;
 
@@ -72,10 +71,7 @@ export default function DashboardPage() {
                     <button
                       key={s}
                       type="button"
-                      onClick={() => {
-                        if (/weather|temps/i.test(s)) setOptions({ tools: true, webSearch: false });
-                        void send({ text: s });
-                      }}
+                      onClick={() => void send({ text: s, options: /weather|temps/i.test(s) ? { tools: true, webSearch: false } : undefined })}
                       className="rounded-full border border-border px-3.5 py-1.5 text-xs text-fg-muted transition-colors hover:border-brand-500 hover:text-fg"
                     >
                       {s}

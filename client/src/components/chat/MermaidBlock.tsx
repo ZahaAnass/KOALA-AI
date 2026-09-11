@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useUi } from "@/store/ui";
 
 let renderCounter = 0;
@@ -6,6 +7,7 @@ let renderCounter = 0;
 /** Renders a mermaid diagram lazily (the library is code-split and loaded on first use). */
 export function MermaidBlock({ code }: { code: string }) {
   const id = useId().replace(/:/g, "");
+  const { t } = useTranslation();
   const theme = useUi((s) => s.theme);
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -23,13 +25,13 @@ export function MermaidBlock({ code }: { code: string }) {
           setError("");
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not render diagram");
+        if (!cancelled) setError(err instanceof Error ? err.message : t("message.diagramError"));
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [code, id, theme]);
+  }, [code, id, theme, t]);
 
   if (error) {
     return (

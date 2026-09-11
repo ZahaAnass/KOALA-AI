@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 export const modKey = isMac ? "⌘" : "Ctrl";
 
 export function formatRelative(date: string | Date, locale = "en"): string {
@@ -50,15 +50,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
-export function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
 /** Group chats by relative period for the sidebar. */
 export function groupByPeriod<T extends { lastMessageAt: string }>(items: T[], labels: { today: string; yesterday: string; week: string; month: string; older: string }) {
   const now = new Date();
@@ -76,12 +67,6 @@ export function groupByPeriod<T extends { lastMessageAt: string }>(items: T[], l
     groups[idx]!.items.push(item);
   }
   return groups.filter((g) => g.items.length > 0);
-}
-
-export const URL_REGEX = /https?:\/\/[^\s<>"')\]]+/i;
-
-export function extractFirstUrl(text: string): string | null {
-  return text.match(URL_REGEX)?.[0] ?? null;
 }
 
 export function safeLocalStorage() {

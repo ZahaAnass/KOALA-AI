@@ -40,6 +40,7 @@ describe("users", () => {
     await Chat.create({ userId: USER, title: "x", messages: [], messageCount: 0 });
     await request(app).get("/api/users/me").set(as(USER));
     const res = await request(app).delete("/api/users/me").set(as(USER));
+    expect(res.body).toEqual({});
     expect(res.status).toBe(204);
     expect(await Chat.countDocuments({ userId: USER })).toBe(0);
     expect(await User.countDocuments({ clerkId: USER })).toBe(0);

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { speechLang } from "@/i18n";
 import { useChat, useLoadEarlier, useMessageFeedback } from "@/hooks/useChats";
 import { useChatStream } from "@/hooks/useChatStream";
 import { useSpeechOutput } from "@/hooks/useSpeech";
@@ -16,21 +17,23 @@ import { Message } from "@/components/chat/Message";
 import { FollowUps } from "@/components/chat/MessageExtras";
 
 const emptyUsage = { promptTokens: 0, candidateTokens: 0, totalTokens: 0 };
+/** Stable empty array so the zustand selector never returns a fresh reference. */
+const NO_FOLLOW_UPS: string[] = [];
 
 /** Conversation view: message history, live streaming answer, follow-ups and the composer. */
 export default function ChatPage() {
   const { id = "" } = useParams();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: chat, isPending, error } = useChat(id);
   const loadEarlier = useLoadEarlier(id);
   const feedback = useMessageFeedback(id);
   const { send, regenerate, edit, stop, streaming } = useChatStream();
-  const speech = useSpeechOutput(i18n.language === "fr" ? "fr-FR" : "en-US");
+  const speech = useSpeechOutput(speechLang());
 
   const active = useChatStore((s) => s.active);
-  const followUps = useChatStore((s) => s.followUps[id] ?? []);
-  const clearActive = useChatStore((s) => s.clear);
+  const followUps = useChatStore((s) => s.followUps[id] ?? NO_FOLLOW_UPS);
+  const finishActive = useChatStore((s) => s.finish);
   const isActiveHere = active?.chatId === id;
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -58,8 +61,8 @@ export default function ChatPage() {
 
   // Dismiss a failed generation error when leaving the chat.
   useEffect(() => () => {
-    if (useChatStore.getState().active?.error) clearActive();
-  }, [id, clearActive]);
+    if (useChatStore.getState().active?.error) finishActive();
+  }, [id, finishActive]);
 
   /** Visible messages: cached history, trimmed during regenerate/edit, plus the live exchange. */
   const messages = useMemo<MessageType[]>(() => {
@@ -69,8 +72,10 @@ export default function ChatPage() {
       if (active.answeringMessageId) {
         const idx = list.findIndex((m) => m._id === active.answeringMessageId);
         if (idx >= 0) list = list.slice(0, idx + 1);
-        if (active.userMessage) list = list.map((m) => (m._id === active.answeringMessageId ? { ...m, text: active.userMessage!.text, edited: true } : m));
-      } else if (active.userMessage) {
+        const edited = active.userMessage;
+        if (edited) list = list.map((m) => (m._id === active.answeringMessageId ? { ...m, text: edited.text, edited: true } : m));
+      } else if (active.userMessage && !list.some((m) => m._id === active.userMessageId)) {
+        // The optimistic bubble is shown until the persisted message arrives from the server.
         list = [...list, active.userMessage];
       }
       list = [
@@ -94,6 +99,12 @@ export default function ChatPage() {
     }
     return list;
   }, [chat, active, isActiveHere]);
+
+  // Stable handlers so memoized <Message> rows only re-render when their own data changes.
+  const onRegenerate = useCallback((messageId: string) => void regenerate(id, messageId), [id, regenerate]);
+  const onEdit = useCallback((messageId: string, text: string) => void edit(id, messageId, text), [id, edit]);
+  const onFeedback = useCallback((messageId: string, value: "up" | "down" | null) => feedback.mutate({ messageId, feedback: value }), [feedback]);
+  const retryMessageId = isActiveHere && active?.error ? active.answeringMessageId : null;
 
   const title = chat?.title ?? "";
   useEffect(() => {
@@ -142,16 +153,16 @@ export default function ChatPage() {
                     message={m}
                     streaming={m.streaming}
                     disabled={streaming}
-                    onRegenerate={(mid) => void regenerate(id, mid)}
-                    onEdit={(mid, text) => void edit(id, mid, text)}
-                    onFeedback={(mid, value) => feedback.mutate({ messageId: mid, feedback: value })}
+                    onRegenerate={onRegenerate}
+                    onEdit={onEdit}
+                    onFeedback={onFeedback}
                     onSpeak={speech.supported ? speech.speak : undefined}
                     speakingId={speech.speakingId}
                   />
                 ))}
-                {isActiveHere && active?.error && active.answeringMessageId && (
+                {retryMessageId && (
                   <div className="ml-10">
-                    <Button size="sm" variant="outline" leftIcon={<RefreshCw className="size-4" />} onClick={() => void regenerate(id, active.answeringMessageId!)}>
+                    <Button size="sm" variant="outline" leftIcon={<RefreshCw className="size-4" />} onClick={() => onRegenerate(retryMessageId)}>
                       {t("common.retry")}
                     </Button>
                   </div>

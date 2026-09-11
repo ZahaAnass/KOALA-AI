@@ -5,17 +5,17 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryClient";
-import { copyToClipboard } from "@/lib/utils";
+import { useCopy } from "@/hooks/useCopy";
 import { useUpdateChat } from "@/hooks/useChats";
 import { useModels } from "@/hooks/useUser";
-import type { ChatSummary } from "@/types/api";
+import type { ChatWithInstructions } from "@/types/api";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { Field, Input, Select, Textarea } from "@/components/ui/Form";
 import { Spinner } from "@/components/ui/Feedback";
 
 interface ChatDialogProps {
-  chat: ChatSummary & { systemInstruction?: string };
+  chat: ChatWithInstructions;
   open: boolean;
   onClose: () => void;
 }
@@ -23,7 +23,7 @@ interface ChatDialogProps {
 export function ShareDialog({ chat, open, onClose }: ChatDialogProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopy();
   const shareUrl = chat.shareToken ? `${window.location.origin}/share/${chat.shareToken}` : "";
 
   const invalidate = () => {
@@ -33,12 +33,8 @@ export function ShareDialog({ chat, open, onClose }: ChatDialogProps) {
   const share = useMutation({ mutationFn: () => api.chats.share(chat._id), onSuccess: invalidate });
   const unshare = useMutation({ mutationFn: () => api.chats.unshare(chat._id), onSuccess: invalidate });
 
-  const copy = async () => {
-    if (await copyToClipboard(shareUrl)) {
-      setCopied(true);
-      toast.success(t("chat.shareCopied"));
-      setTimeout(() => setCopied(false), 1500);
-    }
+  const copyLink = async () => {
+    if (await copy(shareUrl)) toast.success(t("chat.shareCopied"));
   };
 
   return (
@@ -47,7 +43,7 @@ export function ShareDialog({ chat, open, onClose }: ChatDialogProps) {
         <div className="flex flex-col gap-3">
           <div className="flex gap-2">
             <Input readOnly value={shareUrl} className="font-mono text-xs" onFocus={(e) => e.currentTarget.select()} />
-            <Button variant="secondary" onClick={copy} leftIcon={copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4" />}>
+            <Button variant="secondary" onClick={() => void copyLink()} leftIcon={copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4" />}>
               {copied ? t("message.copied") : t("message.copy")}
             </Button>
           </div>
@@ -172,7 +168,12 @@ export function TagsDialog({ chat, open, onClose }: ChatDialogProps) {
         autoFocus
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === ",") && (e.preventDefault(), add())}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === ",") {
+            e.preventDefault();
+            add();
+          }
+        }}
         placeholder={t("chat.addTag")}
         className="mt-3"
         maxLength={40}
@@ -194,7 +195,6 @@ export function ImageGenDialog({ open, onClose, chatId }: { open: boolean; onClo
       setResult(data);
       if (chatId) void qc.invalidateQueries({ queryKey: queryKeys.chat(chatId) });
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : t("common.error")),
   });
 
   useEffect(() => {
@@ -207,7 +207,7 @@ export function ImageGenDialog({ open, onClose, chatId }: { open: boolean; onClo
   return (
     <Dialog open={open} onClose={onClose} title={t("composer.generateImage")} size="md">
       <div className="flex flex-col gap-3">
-        <Textarea autoFocus value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="A watercolor koala coding on a laptop, soft morning light" maxLength={2000} />
+        <Textarea autoFocus value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={t("composer.imagePromptPlaceholder")} maxLength={2000} />
         <Button onClick={() => generate.mutate()} disabled={!prompt.trim()} loading={generate.isPending} leftIcon={<Sparkles className="size-4" />}>
           {t("composer.generateImage")}
         </Button>
@@ -229,11 +229,10 @@ export function UrlDialog({ open, onClose, onResult }: { open: boolean; onClose:
   const fetchUrl = useMutation({
     mutationFn: () => api.tools.url(url.trim()),
     onSuccess: (page) => {
-      onResult(`Summarize the following web page in a few bullet points, then list the key takeaways.\n\nTitle: ${page.title}\nURL: ${page.url}\n\n${page.text}`);
+      onResult(t("tools.summarizePrompt", { title: page.title, url: page.url, text: page.text }));
       setUrl("");
       onClose();
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : t("common.error")),
   });
 
   return (
@@ -248,7 +247,9 @@ export function UrlDialog({ open, onClose, onResult }: { open: boolean; onClose:
         </Button>
       }
     >
-      <Input autoFocus type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/article" onKeyDown={(e) => e.key === "Enter" && fetchUrl.mutate()} />
+      <Input autoFocus type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t("composer.urlPlaceholder")} onKeyDown={(e) => {
+          if (e.key === "Enter") fetchUrl.mutate();
+        }} />
     </Dialog>
   );
 }

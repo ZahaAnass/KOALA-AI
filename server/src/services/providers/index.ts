@@ -9,10 +9,6 @@ export function listModels(): ModelInfo[] {
   return providers.filter((p) => p.isConfigured()).flatMap((p) => p.models());
 }
 
-export function findModel(id: string): ModelInfo | undefined {
-  return listModels().find((m) => m.id === id);
-}
-
 /** Resolves the provider for a model id, falling back to the default model when unknown. */
 export function resolveModel(requested?: string | null): { provider: ChatProvider; model: ModelInfo } {
   const available = listModels();

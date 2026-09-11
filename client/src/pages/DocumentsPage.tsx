@@ -54,13 +54,11 @@ export default function DocumentsPage() {
       toast.success(t("documents.uploaded"));
       void queryClient.invalidateQueries({ queryKey: queryKeys.documents });
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : t("common.error")),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => api.documents.remove(id),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: queryKeys.documents }),
-    onError: (err) => toast.error(err instanceof Error ? err.message : t("common.error")),
   });
 
   const handleFiles = (files: FileList | null) => {
@@ -91,10 +89,6 @@ export default function DocumentsPage() {
       </div>
 
       <div
-        role="button"
-        tabIndex={0}
-        onClick={() => inputRef.current?.click()}
-        onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -102,7 +96,7 @@ export default function DocumentsPage() {
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-10 text-center transition-colors",
+          "flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-10 text-center transition-colors",
           dragging ? "border-brand-500 bg-brand-500/5" : "border-border-strong hover:border-brand-500/60",
         )}
       >
@@ -116,12 +110,21 @@ export default function DocumentsPage() {
             <UploadCloud className="size-8 text-fg-subtle" />
             <p className="text-sm font-medium">{t("documents.upload")}</p>
             <p className="text-xs text-fg-muted">{t("documents.dropHint")}</p>
-            <Button size="sm" variant="outline" className="mt-1" onClick={(e) => e.stopPropagation()} type="button">
+            <Button size="sm" variant="outline" className="mt-1" type="button" onClick={() => inputRef.current?.click()}>
               {t("documents.upload")}
             </Button>
           </>
         )}
-        <input ref={inputRef} type="file" accept={ACCEPT} className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPT}
+          className="hidden"
+          onChange={(e) => {
+            handleFiles(e.target.files);
+            e.target.value = ""; // allow re-selecting the same file
+          }}
+        />
       </div>
 
       {isPending ? (

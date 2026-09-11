@@ -1,7 +1,13 @@
-import { QueryClient } from "@tanstack/react-query";
+import { MutationCache, QueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import i18n from "@/i18n";
 import { ApiError } from "./api";
 
 export const queryClient = new QueryClient({
+  // Every failed mutation surfaces its message once; individual mutations only add rollback logic.
+  mutationCache: new MutationCache({
+    onError: (error) => toast.error(error instanceof Error && error.message ? error.message : i18n.t("common.error")),
+  }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,

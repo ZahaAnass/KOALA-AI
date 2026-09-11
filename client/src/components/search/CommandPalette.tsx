@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { BarChart3, FileText, MessageSquare, Plus, Search, Settings, SunMoon, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryClient";
+import { useDebounced } from "@/hooks/useDebounced";
 import { cn, formatRelative } from "@/lib/utils";
 import { useUi } from "@/store/ui";
 import { Dialog } from "@/components/ui/Dialog";
@@ -17,15 +18,6 @@ interface Item {
   label: string;
   hint?: string;
   run: () => void;
-}
-
-function useDebounced<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-  return debounced;
 }
 
 /** Global search and command palette (⌘K / Ctrl+K). */
@@ -62,7 +54,16 @@ export function CommandPalette() {
   const items = useMemo<Item[]>(() => {
     const actions: Item[] = [
       { id: "new", section: "actions", icon: <Plus />, label: t("search.newChat"), run: () => go("/dashboard") },
-      { id: "theme", section: "actions", icon: <SunMoon />, label: t("search.toggleTheme"), run: () => { cycleTheme(); close(); } },
+      {
+        id: "theme",
+        section: "actions",
+        icon: <SunMoon />,
+        label: t("search.toggleTheme"),
+        run: () => {
+          cycleTheme();
+          close();
+        },
+      },
       { id: "settings", section: "actions", icon: <Settings />, label: t("search.openSettings"), run: () => go("/settings") },
       { id: "documents", section: "actions", icon: <FileText />, label: t("search.openDocuments"), run: () => go("/documents") },
       { id: "prompts", section: "actions", icon: <Sparkles />, label: t("search.openPrompts"), run: () => go("/prompts") },
@@ -87,7 +88,7 @@ export function CommandPalette() {
     listRef.current?.querySelector<HTMLElement>(`[data-index="${highlight}"]`)?.scrollIntoView({ block: "nearest" });
   }, [highlight]);
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlight((h) => Math.min(h + 1, items.length - 1));
@@ -106,7 +107,7 @@ export function CommandPalette() {
   ];
 
   return (
-    <Dialog open={open} onClose={close} size="md" className="overflow-hidden">
+    <Dialog open={open} onClose={close} size="md" className="overflow-hidden" aria-label={t("search.title")}>
       <div className="-mx-6 -my-5" onKeyDown={onKeyDown}>
         <div className="flex items-center gap-3 border-b border-border px-4">
           <Search className="size-4 shrink-0 text-fg-subtle" />

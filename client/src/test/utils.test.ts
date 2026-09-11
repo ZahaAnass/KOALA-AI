@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractFirstUrl, formatBytes, groupByPeriod } from "@/lib/utils";
+import { formatBytes, groupByPeriod } from "@/lib/utils";
 
 const labels = { today: "Today", yesterday: "Yesterday", week: "Week", month: "Month", older: "Older" };
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
@@ -20,15 +20,6 @@ describe("groupByPeriod", () => {
 
   it("returns nothing for an empty list", () => {
     expect(groupByPeriod([], labels)).toEqual([]);
-  });
-});
-
-describe("extractFirstUrl", () => {
-  it("finds the first http(s) URL", () => {
-    expect(extractFirstUrl("see https://example.com/a?b=1 and http://x.io")).toBe("https://example.com/a?b=1");
-  });
-  it("returns null when absent", () => {
-    expect(extractFirstUrl("no links here")).toBeNull();
   });
 });
 

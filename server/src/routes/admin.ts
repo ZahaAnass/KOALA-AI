@@ -7,6 +7,7 @@ import { User } from "../models/User.js";
 import { Chat } from "../models/Chat.js";
 import { KnowledgeDocument } from "../models/Document.js";
 import { notFound, badRequest } from "../utils/errors.js";
+import { deleteUserData, escapeRegex } from "../services/users.js";
 
 const router = Router();
 router.use(requireAuth, requireAdmin);
@@ -76,7 +77,8 @@ router.get(
   }),
   asyncHandler(async (req, res) => {
     const { q, limit, offset } = req.query as unknown as { q?: string; limit: number; offset: number };
-    const filter = q ? { $or: [{ email: { $regex: q, $options: "i" } }, { name: { $regex: q, $options: "i" } }, { clerkId: q }] } : {};
+    const pattern = q ? escapeRegex(q) : "";
+    const filter = q ? { $or: [{ email: { $regex: pattern, $options: "i" } }, { name: { $regex: pattern, $options: "i" } }, { clerkId: q }] } : {};
     const [users, total] = await Promise.all([
       User.find(filter).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
       User.countDocuments(filter),
@@ -132,10 +134,9 @@ router.delete(
   validate({ params: z.object({ id: z.string().min(1) }) }),
   asyncHandler(async (req, res) => {
     if (req.params.id === req.userId) throw badRequest("Use account settings to delete your own account");
-    const result = await User.deleteOne({ clerkId: req.params.id });
-    if (!result.deletedCount) throw notFound("User not found");
-    await Promise.all([Chat.deleteMany({ userId: req.params.id }), KnowledgeDocument.deleteMany({ userId: req.params.id })]);
-    invalidateUserCache(req.params.id!);
+    const exists = await User.exists({ clerkId: req.params.id });
+    if (!exists) throw notFound("User not found");
+    await deleteUserData(req.params.id!, { removeFromClerk: true });
     res.status(204).end();
   }),
 );

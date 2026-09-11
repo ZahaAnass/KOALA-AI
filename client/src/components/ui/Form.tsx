@@ -1,8 +1,10 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 const fieldBase =
   "w-full rounded-xl border border-border bg-bg-elevated px-3.5 text-sm text-fg placeholder:text-fg-subtle transition-colors focus:border-brand-500 focus:outline-none disabled:opacity-50";
+
+const chevron = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238d89a0' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`;
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...props }, ref) {
   return <input ref={ref} className={cn(fieldBase, "h-10", className)} {...props} />;
@@ -20,14 +22,29 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   );
 });
 
-const chevron = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238d89a0' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`;
-
+/**
+ * Labelled form row. With `htmlFor` it renders a real <label>; otherwise it becomes a labelled
+ * group, which suits composite controls such as sliders and segmented controls.
+ */
 export function Field({ label, hint, children, htmlFor, className }: { label: string; hint?: string; children: ReactNode; htmlFor?: string; className?: string }) {
+  const labelId = useId();
+  const labelClass = "text-sm font-medium";
+  if (htmlFor) {
+    return (
+      <div className={cn("flex flex-col gap-1.5", className)}>
+        <label htmlFor={htmlFor} className={labelClass}>
+          {label}
+        </label>
+        {children}
+        {hint && <p className="text-xs text-fg-muted">{hint}</p>}
+      </div>
+    );
+  }
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
-      <label htmlFor={htmlFor} className="text-sm font-medium">
+    <div role="group" aria-labelledby={labelId} className={cn("flex flex-col gap-1.5", className)}>
+      <span id={labelId} className={labelClass}>
         {label}
-      </label>
+      </span>
       {children}
       {hint && <p className="text-xs text-fg-muted">{hint}</p>}
     </div>
@@ -55,18 +72,46 @@ export function Switch({ checked, onChange, label, description, disabled }: { ch
   );
 }
 
-export function Slider({ value, min, max, step, onChange, format }: { value: number; min: number; max: number; step: number; onChange: (v: number) => void; format?: (v: number) => string }) {
+interface SliderProps {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (v: number) => void;
+  format?: (v: number) => string;
+  "aria-label": string;
+}
+
+export function Slider({ value, min, max, step, onChange, format, "aria-label": ariaLabel }: SliderProps) {
   return (
     <div className="flex items-center gap-3">
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-1.5 flex-1 cursor-pointer accent-brand-500" />
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        aria-label={ariaLabel}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="h-1.5 flex-1 cursor-pointer accent-brand-500"
+      />
       <span className="w-12 text-right font-mono text-xs text-fg-muted">{format ? format(value) : value}</span>
     </div>
   );
 }
 
-export function SegmentedControl<T extends string>({ value, options, onChange, size = "md" }: { value: T; options: Array<{ value: T; label: ReactNode }>; onChange: (v: T) => void; size?: "sm" | "md" }) {
+interface SegmentedControlProps<T extends string> {
+  value: T;
+  options: Array<{ value: T; label: ReactNode }>;
+  onChange: (v: T) => void;
+  size?: "sm" | "md";
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+}
+
+export function SegmentedControl<T extends string>({ value, options, onChange, size = "md", "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy }: SegmentedControlProps<T>) {
   return (
-    <div className="inline-flex rounded-xl bg-bg-muted p-1" role="radiogroup">
+    <div className="inline-flex rounded-xl bg-bg-muted p-1" role="radiogroup" aria-label={ariaLabel} aria-labelledby={ariaLabelledBy}>
       {options.map((opt) => (
         <button
           key={opt.value}

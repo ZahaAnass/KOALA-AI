@@ -28,8 +28,12 @@ describe("health & docs", () => {
     expect(res.body.error.code).toBe("NOT_FOUND");
   });
 
-  it("rejects disallowed CORS origins", async () => {
+  it("omits CORS headers for disallowed origins without failing the request", async () => {
     const res = await request(app).get("/health").set("Origin", "https://evil.example");
+    expect(res.status).toBe(200);
     expect(res.headers["access-control-allow-origin"]).toBeUndefined();
+
+    const ok = await request(app).get("/health").set("Origin", "http://localhost:5173");
+    expect(ok.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
   });
 });

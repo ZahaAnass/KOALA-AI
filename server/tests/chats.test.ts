@@ -23,9 +23,9 @@ describe("auth guard", () => {
     expect(res.body.error.code).toBe("UNAUTHORIZED");
   });
 
-  it("does not trust a forged JWT payload", async () => {
-    const forged = `${Buffer.from('{"alg":"none"}').toString("base64url")}.${Buffer.from('{"sub":"user_victim"}').toString("base64url")}.sig`;
-    const res = await request(app).get("/api/chats").set("Authorization", `Bearer ${forged}`);
+  it("ignores bearer tokens when Clerk is not configured (nothing is decoded by hand)", async () => {
+    const unsigned = `${Buffer.from('{"alg":"none"}').toString("base64url")}.${Buffer.from('{"sub":"user_victim"}').toString("base64url")}.sig`;
+    const res = await request(app).get("/api/chats").set("Authorization", `Bearer ${unsigned}`);
     expect(res.status).toBe(401);
   });
 });

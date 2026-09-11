@@ -55,18 +55,12 @@ export async function ensureUser(clerkId: string): Promise<UserDoc> {
   const cached = userCache.get(clerkId);
   if (cached && cached.expires > Date.now()) return cached.user;
 
+  // ADMIN_EMAILS only seeds the role on first sight, so an admin can later demote that user.
   let user = await User.findOne({ clerkId });
   if (!user) {
     const profile = await fetchClerkProfile(clerkId);
     const role = env.ADMIN_EMAILS.includes(profile.email) ? "admin" : "user";
-    user = await User.findOneAndUpdate(
-      { clerkId },
-      { $setOnInsert: { clerkId, ...profile, role } },
-      { upsert: true, new: true },
-    );
-  } else if (user.role !== "admin" && user.email && env.ADMIN_EMAILS.includes(user.email)) {
-    user.role = "admin";
-    await user.save();
+    user = await User.findOneAndUpdate({ clerkId }, { $setOnInsert: { clerkId, ...profile, role } }, { upsert: true, new: true });
   }
 
   if (!user) throw unauthorized();

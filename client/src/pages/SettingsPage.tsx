@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,7 +6,9 @@ import { useClerk } from "@clerk/clerk-react";
 import { Download, RotateCcw, Trash2, UserX } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { modKey } from "@/lib/utils";
+import { SHORTCUTS } from "@/lib/shortcuts";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { safeLocalStorage } from "@/lib/utils";
 import { setLocale } from "@/i18n";
 import { useUi } from "@/store/ui";
 import { useModels, useUpdateSettings, useUser } from "@/hooks/useUser";
@@ -15,18 +17,12 @@ import { Button } from "@/components/ui/Button";
 import { Kbd, PageHeader, Skeleton } from "@/components/ui/Feedback";
 import { Field, SegmentedControl, Select, Slider, Switch, Textarea } from "@/components/ui/Form";
 import { ConfirmDialog } from "@/components/ui/Dialog";
+import { QuotaBar } from "@/components/ui/QuotaBar";
+import { Section } from "@/components/ui/Section";
 import type { Locale, SafetyLevel, Settings, Theme } from "@/types/api";
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="surface rounded-2xl p-5">
-      <h2 className="mb-4 font-display text-base font-semibold">{title}</h2>
-      <div className="flex flex-col gap-4">{children}</div>
-    </section>
-  );
-}
-
 const SAFETY_LEVELS: SafetyLevel[] = ["off", "low", "medium", "high"];
+const storage = safeLocalStorage();
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -70,7 +66,7 @@ export default function SettingsPage() {
   };
 
   const replayTour = () => {
-    localStorage.removeItem("koala:tour-done");
+    storage.remove(STORAGE_KEYS.tourDone);
     navigate("/dashboard?tour=1");
   };
 
@@ -86,18 +82,6 @@ export default function SettingsPage() {
     navigate("/");
   };
 
-  const shortcuts: Array<{ keys: string[]; label: string }> = [
-    { keys: [modKey, "K"], label: t("shortcuts.search") },
-    { keys: [modKey, "Shift", "O"], label: t("shortcuts.newChat") },
-    { keys: [modKey, "B"], label: t("shortcuts.toggleSidebar") },
-    { keys: ["Esc"], label: t("shortcuts.stop") },
-    { keys: ["/"], label: t("shortcuts.focus") },
-    { keys: [modKey, "Shift", "L"], label: t("shortcuts.theme") },
-    { keys: ["?"], label: t("shortcuts.help") },
-  ];
-
-  const quota = user.quota;
-
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-5 p-4 sm:p-6">
       <PageHeader title={t("settings.title")} />
@@ -107,6 +91,7 @@ export default function SettingsPage() {
           <SegmentedControl<Theme>
             value={theme}
             onChange={changeTheme}
+            aria-label={t("theme.label")}
             options={[
               { value: "system", label: t("theme.system") },
               { value: "light", label: t("theme.light") },
@@ -118,6 +103,7 @@ export default function SettingsPage() {
           <SegmentedControl<Locale>
             value={settings.locale}
             onChange={changeLocale}
+            aria-label={t("language.label")}
             options={[
               { value: "en", label: t("language.en") },
               { value: "fr", label: t("language.fr") },
@@ -153,15 +139,16 @@ export default function SettingsPage() {
           </Button>
         </Field>
         <Field label={t("settings.temperature")} hint={t("settings.temperatureHint")}>
-          <Slider value={settings.temperature} min={0} max={2} step={0.1} onChange={(v) => save({ temperature: Number(v.toFixed(1)) })} format={(v) => v.toFixed(1)} />
+          <Slider aria-label={t("settings.temperature")} value={settings.temperature} min={0} max={2} step={0.1} onChange={(v) => save({ temperature: Number(v.toFixed(1)) })} format={(v) => v.toFixed(1)} />
         </Field>
         <Field label={t("settings.maxTokens")}>
-          <Slider value={settings.maxOutputTokens} min={256} max={16384} step={256} onChange={(v) => save({ maxOutputTokens: v })} />
+          <Slider aria-label={t("settings.maxTokens")} value={settings.maxOutputTokens} min={256} max={16384} step={256} onChange={(v) => save({ maxOutputTokens: v })} />
         </Field>
         <Field label={t("settings.safety")} hint={t("settings.safetyHint")}>
           <SegmentedControl<SafetyLevel>
             value={settings.safetyLevel}
             onChange={(v) => save({ safetyLevel: v })}
+            aria-label={t("settings.safety")}
             options={SAFETY_LEVELS.map((level) => ({ value: level, label: t(`settings.safety_${level}`) }))}
           />
         </Field>
@@ -172,23 +159,14 @@ export default function SettingsPage() {
       </Section>
 
       <Section title={t("settings.quotaTitle")}>
-        {quota.limit === null ? (
-          <p className="text-sm text-fg-muted">{t("settings.quotaUnlimited")}</p>
-        ) : (
-          <>
-            <p className="text-sm text-fg-muted">{t("settings.quotaText", { used: quota.usedToday, limit: quota.limit })}</p>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-bg-muted">
-              <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${Math.min(100, (quota.usedToday / quota.limit) * 100)}%` }} />
-            </div>
-          </>
-        )}
+        <QuotaBar quota={user.quota} />
       </Section>
 
       <Section title={t("settings.shortcuts")}>
         <ul className="divide-y divide-border">
-          {shortcuts.map((s) => (
-            <li key={s.label} className="flex items-center justify-between py-2 text-sm">
-              <span>{s.label}</span>
+          {SHORTCUTS.map((s) => (
+            <li key={s.labelKey} className="flex items-center justify-between py-2 text-sm">
+              <span>{t(s.labelKey)}</span>
               <span className="flex items-center gap-1">
                 {s.keys.map((k) => (
                   <Kbd key={k}>{k}</Kbd>

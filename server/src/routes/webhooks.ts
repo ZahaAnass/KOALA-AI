@@ -3,10 +3,8 @@ import { Webhook } from "svix";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 import { User } from "../models/User.js";
-import { Chat } from "../models/Chat.js";
-import { KnowledgeDocument } from "../models/Document.js";
-import { PromptTemplate } from "../models/PromptTemplate.js";
 import { invalidateUserCache } from "../middleware/auth.js";
+import { deleteUserData } from "../services/users.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { unauthorized, serviceUnavailable } from "../utils/errors.js";
 
@@ -58,13 +56,7 @@ router.post(
       await User.updateOne({ clerkId: d.id }, { $set, $setOnInsert: { clerkId: d.id } }, { upsert: true });
       invalidateUserCache(d.id);
     } else if (event.type === "user.deleted" && d.id) {
-      await Promise.all([
-        User.deleteOne({ clerkId: d.id }),
-        Chat.deleteMany({ userId: d.id }),
-        KnowledgeDocument.deleteMany({ userId: d.id }),
-        PromptTemplate.deleteMany({ userId: d.id }),
-      ]);
-      invalidateUserCache(d.id);
+      await deleteUserData(d.id);
     }
     logger.info({ type: event.type, userId: d.id }, "Clerk webhook processed");
     res.json({ received: true });

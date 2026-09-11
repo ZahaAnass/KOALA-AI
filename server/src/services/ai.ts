@@ -33,14 +33,13 @@ export async function generateFollowUps(question: string, answer: string): Promi
   if (!provider) return [];
   try {
     const raw = await provider.complete(
-      `Given this exchange, suggest 3 short follow-up questions the user could ask next. Use the user's language. Respond ONLY with a JSON array of 3 strings.\n\nUser: ${clip(question, 1000)}\nAssistant: ${clip(answer, 2000)}`,
+      `Given this exchange, suggest 3 short follow-up questions the user could ask next. Use the user's language. Respond ONLY with JSON of the form {"questions": ["...", "...", "..."]}.\n\nUser: ${clip(question, 1000)}\nAssistant: ${clip(answer, 2000)}`,
       { maxOutputTokens: 200, json: true },
     );
     const parsed: unknown = JSON.parse(raw.replace(/```json|```/g, "").trim());
-    if (Array.isArray(parsed)) {
-      return parsed.filter((s): s is string => typeof s === "string" && s.trim().length > 0).slice(0, 3);
-    }
-    return [];
+    const list = Array.isArray(parsed) ? parsed : (parsed as { questions?: unknown })?.questions;
+    if (!Array.isArray(list)) return [];
+    return list.filter((s): s is string => typeof s === "string" && s.trim().length > 0).slice(0, 3);
   } catch (err) {
     logger.debug({ err }, "Follow-up generation failed");
     return [];

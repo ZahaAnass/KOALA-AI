@@ -6,9 +6,7 @@ import { queryKeys } from "@/lib/queryClient";
 import type { ChatDetail, ChatListResponse, ChatSummary } from "@/types/api";
 
 export interface ChatListFilters {
-  q?: string;
   archived?: boolean;
-  pinned?: boolean;
   tag?: string;
   folder?: string;
 }
@@ -51,21 +49,24 @@ export function useLoadEarlier(id: string) {
 /** Mutations for a chat's metadata (rename, pin, archive, tags, folder, model, instructions). */
 export function useUpdateChat() {
   const qc = useQueryClient();
-  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ id, patch }: { id: string; patch: Parameters<typeof api.chats.update>[1] }) => api.chats.update(id, patch),
     onMutate: async ({ id, patch }) => {
       await qc.cancelQueries({ queryKey: ["chats"] });
+      const previousDetail = qc.getQueryData<ChatDetail>(queryKeys.chat(id));
       qc.setQueriesData<ChatListResponse>({ queryKey: ["chats"], exact: false }, (list) =>
         list && "items" in list ? { ...list, items: list.items.map((c) => (c._id === id ? { ...c, ...patch } : c)) } : list,
       );
       qc.setQueryData<ChatDetail>(queryKeys.chat(id), (chat) => (chat ? { ...chat, ...patch } : chat));
+      return { previousDetail };
     },
     onSuccess: (updated: ChatSummary) => {
       qc.setQueryData<ChatDetail>(queryKeys.chat(updated._id), (chat) => (chat ? { ...chat, ...updated } : chat));
-      void qc.invalidateQueries({ queryKey: ["chats"], exact: false });
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : t("common.error")),
+    onError: (_err, { id }, ctx) => {
+      if (ctx?.previousDetail) qc.setQueryData(queryKeys.chat(id), ctx.previousDetail);
+    },
+    onSettled: () => void qc.invalidateQueries({ queryKey: ["chats"], exact: false }),
   });
 }
 
@@ -79,7 +80,6 @@ export function useDeleteChat() {
       void qc.invalidateQueries({ queryKey: ["chats"], exact: false });
       toast.success(t("chat.deleted"));
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : t("common.error")),
   });
 }
 
@@ -92,18 +92,24 @@ export function useBulkDeleteChats() {
       void qc.invalidateQueries({ queryKey: ["chats"], exact: false });
       toast.success(t("chat.deleted"));
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : t("common.error")),
   });
 }
 
 export function useMessageFeedback(chatId: string) {
   const qc = useQueryClient();
+  const setFeedback = (messageId: string, feedback: "up" | "down" | null) =>
+    qc.setQueryData<ChatDetail>(queryKeys.chat(chatId), (chat) =>
+      chat ? { ...chat, messages: chat.messages.map((m) => (m._id === messageId ? { ...m, feedback } : m)) } : chat,
+    );
   return useMutation({
     mutationFn: ({ messageId, feedback, note }: { messageId: string; feedback: "up" | "down" | null; note?: string }) => api.chats.feedback(chatId, messageId, feedback, note),
     onMutate: ({ messageId, feedback }) => {
-      qc.setQueryData<ChatDetail>(queryKeys.chat(chatId), (chat) =>
-        chat ? { ...chat, messages: chat.messages.map((m) => (m._id === messageId ? { ...m, feedback } : m)) } : chat,
-      );
+      const previous = qc.getQueryData<ChatDetail>(queryKeys.chat(chatId))?.messages.find((m) => m._id === messageId)?.feedback ?? null;
+      setFeedback(messageId, feedback);
+      return { previous };
+    },
+    onError: (_err, { messageId }, ctx) => {
+      setFeedback(messageId, ctx?.previous ?? null);
     },
   });
 }
@@ -117,5 +123,6 @@ export async function downloadExport(id: string, title: string, format: "md" | "
   a.href = url;
   a.download = `${title.replace(/[^\w\- ]/g, "").trim() || "chat"}.${format}`;
   a.click();
-  URL.revokeObjectURL(url);
+  // Revoke after the browser has had a chance to start the download.
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

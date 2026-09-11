@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { Button } from "./Button";
-import { IconButton } from "./Button";
+import { Button, IconButton } from "./Button";
 import { Input } from "./Form";
 
 export interface DialogProps {
@@ -12,15 +11,22 @@ export interface DialogProps {
   onClose: () => void;
   title?: string;
   description?: string;
+  /** Accessible name when no visible title is rendered. */
+  "aria-label"?: string;
+  /** Id of an element inside the dialog that names it (alternative to `title`). */
+  "aria-labelledby"?: string;
   children?: ReactNode;
   footer?: ReactNode;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
+const widths = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl" };
+
 /** Accessible modal dialog using the native <dialog> element. */
-export function Dialog({ open, onClose, title, description, children, footer, size = "md", className }: DialogProps) {
+export function Dialog({ open, onClose, title, description, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, children, footer, size = "md", className }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -41,12 +47,14 @@ export function Dialog({ open, onClose, title, description, children, footer, si
     return () => el.removeEventListener("cancel", onCancel);
   }, [onClose]);
 
-  const widths = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl" };
-
   return createPortal(
     <dialog
       ref={ref}
-      onClick={(e) => e.target === ref.current && onClose()}
+      aria-labelledby={title ? titleId : ariaLabelledBy}
+      aria-label={title ? undefined : ariaLabel}
+      onClick={(e) => {
+        if (e.target === ref.current) onClose();
+      }}
       className={cn(
         "m-auto w-[calc(100%-2rem)] rounded-3xl bg-transparent p-0 text-fg backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-slide-up",
         widths[size],
@@ -56,7 +64,11 @@ export function Dialog({ open, onClose, title, description, children, footer, si
         {(title || description) && (
           <div className="flex items-start justify-between gap-4 px-6 pt-5">
             <div>
-              {title && <h2 className="font-display text-lg font-semibold">{title}</h2>}
+              {title && (
+                <h2 id={titleId} className="font-display text-lg font-semibold">
+                  {title}
+                </h2>
+              )}
               {description && <p className="mt-1 text-sm text-fg-muted">{description}</p>}
             </div>
             <IconButton label={t("common.close")} size="sm" onClick={onClose}>
@@ -166,7 +178,9 @@ export function PromptDialog({ open, onClose, onSubmit, title, initialValue = ""
         value={value}
         placeholder={placeholder}
         onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && void submit()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") void submit();
+        }}
         aria-label={title}
       />
     </Dialog>

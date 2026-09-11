@@ -47,18 +47,17 @@ function TemplateCard({ template, onUse, onEdit, onDelete }: { template: PromptT
   );
 }
 
-function TemplateDialog({ open, initial, onClose, onSubmit, busy }: { open: boolean; initial: TemplateInput; onClose: () => void; onSubmit: (v: TemplateInput) => void; busy: boolean }) {
+function TemplateDialog({ open, mode, initial, onClose, onSubmit, busy }: { open: boolean; mode: "create" | "edit"; initial: TemplateInput; onClose: () => void; onSubmit: (v: TemplateInput) => void; busy: boolean }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<TemplateInput>(initial);
   const set = (patch: Partial<TemplateInput>) => setForm((f) => ({ ...f, ...patch }));
   const valid = form.title.trim().length > 0 && form.content.trim().length > 0;
-  const isEdit = initial.title.length > 0;
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      title={isEdit ? t("prompts.edit") : t("prompts.new")}
+      title={mode === "edit" ? t("prompts.edit") : t("prompts.new")}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -100,7 +99,6 @@ export default function PromptsPage() {
   const { data, isPending } = useQuery({ queryKey: queryKeys.prompts, queryFn: api.prompts.list });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.prompts });
-  const onError = (err: unknown) => toast.error(err instanceof Error ? err.message : t("common.error"));
 
   const save = useMutation({
     mutationFn: (input: TemplateInput) => (editing && editing !== "new" ? api.prompts.update(editing._id, input) : api.prompts.create(input)),
@@ -109,7 +107,6 @@ export default function PromptsPage() {
       setEditing(null);
       void invalidate();
     },
-    onError,
   });
 
   const remove = useMutation({
@@ -118,7 +115,6 @@ export default function PromptsPage() {
       toast.success(t("prompts.deleted"));
       void invalidate();
     },
-    onError,
   });
 
   const use = (template: PromptTemplate) => {
@@ -181,6 +177,7 @@ export default function PromptsPage() {
         <TemplateDialog
           key={editing === "new" ? "new" : editing._id}
           open
+          mode={editing === "new" ? "create" : "edit"}
           initial={editing === "new" ? EMPTY : { title: editing.title, content: editing.content, category: editing.category, icon: editing.icon }}
           onClose={() => setEditing(null)}
           onSubmit={(v) => save.mutate(v)}

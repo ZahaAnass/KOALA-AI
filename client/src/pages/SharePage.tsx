@@ -19,7 +19,7 @@ function SharedMessage({ message }: { message: SharedChat["messages"][number] })
       {message.images.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {message.images.map((img) => (
-            <img key={img.filePath} src={img.url} alt="" className="max-h-72 rounded-2xl border border-border object-cover" loading="lazy" />
+            <img key={img.filePath} src={img.url} alt={t("message.attachedImage")} className="max-h-72 rounded-2xl border border-border object-cover" loading="lazy" />
           ))}
         </div>
       )}

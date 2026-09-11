@@ -1,17 +1,15 @@
 import { Router } from "express";
 import { z } from "zod";
-import { clerkClient } from "@clerk/express";
 import { invalidateUserCache, requireAuth } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { badRequest } from "../utils/errors.js";
 import { SAFETY_LEVELS, User } from "../models/User.js";
 import { Chat } from "../models/Chat.js";
 import { KnowledgeDocument } from "../models/Document.js";
-import { PromptTemplate } from "../models/PromptTemplate.js";
 import { quotaFor, todayKey } from "../middleware/quota.js";
-import { env } from "../config/env.js";
-import { logger } from "../config/logger.js";
 import { listModels } from "../services/providers/index.js";
+import { deleteUserData } from "../services/users.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -60,10 +58,7 @@ router.patch(
   validate({ body: settingsSchema }),
   asyncHandler(async (req, res) => {
     const body = req.body as z.infer<typeof settingsSchema>;
-    if (body.model && !listModels().some((m) => m.id === body.model)) {
-      res.status(400).json({ error: { code: "BAD_REQUEST", message: "Unknown model" } });
-      return;
-    }
+    if (body.model && !listModels().some((m) => m.id === body.model)) throw badRequest("Unknown model");
     const $set = Object.fromEntries(Object.entries(body).map(([k, v]) => [`settings.${k}`, v]));
     const user = await User.findOneAndUpdate({ clerkId: req.userId }, { $set }, { new: true, runValidators: true });
     invalidateUserCache(req.userId!);
@@ -135,25 +130,11 @@ router.get(
   }),
 );
 
-/** DELETE /api/users/me — delete the account and every piece of data. */
+/** DELETE /api/users/me — delete the account (Clerk first, then every piece of local data). */
 router.delete(
   "/me",
   asyncHandler(async (req, res) => {
-    const userId = req.userId!;
-    await Promise.all([
-      Chat.deleteMany({ userId }),
-      KnowledgeDocument.deleteMany({ userId }),
-      PromptTemplate.deleteMany({ userId }),
-      User.deleteOne({ clerkId: userId }),
-    ]);
-    invalidateUserCache(userId);
-    if (env.CLERK_SECRET_KEY) {
-      try {
-        await clerkClient.users.deleteUser(userId);
-      } catch (err) {
-        logger.warn({ err, userId }, "Clerk user deletion failed (local data removed)");
-      }
-    }
+    await deleteUserData(req.userId!, { removeFromClerk: true });
     res.status(204).end();
   }),
 );

@@ -75,6 +75,22 @@ ChatSchema.index({ title: "text", "messages.text": "text" }, { weights: { title:
 export type MessageDoc = InferSchemaType<typeof MessageSchema> & { _id: mongoose.Types.ObjectId };
 export type ChatDoc = InferSchemaType<typeof ChatSchema> & { _id: mongoose.Types.ObjectId };
 
+/** Plain-object shape of a message, used when building messages before they are attached to a document. */
+export interface PlainMessage {
+  _id: mongoose.Types.ObjectId;
+  role: "user" | "model";
+  text: string;
+  images: Array<{ filePath: string; mimeType: string; url: string }>;
+  sources: Array<{ title: string; uri: string }>;
+  toolCalls: Array<{ name: string; args: Record<string, unknown>; result: unknown }>;
+  model: string;
+  feedback: "up" | "down" | null;
+  feedbackNote: string;
+  usage: { promptTokens: number; candidateTokens: number; totalTokens: number };
+  edited: boolean;
+  createdAt: Date;
+}
+
 export const Chat: Model<ChatDoc> =
   (mongoose.models.Chat as Model<ChatDoc>) || mongoose.model<ChatDoc>("Chat", ChatSchema);
 

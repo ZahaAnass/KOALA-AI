@@ -1,12 +1,14 @@
 import type { Request, Response } from "express";
 
-/** Small helper for Server-Sent Events responses. */
+/**
+ * Small helper for Server-Sent Events responses.
+ * Aborts the generation when the client disconnects before the response is finished.
+ */
 export class SseWriter {
-  private closed = false;
   readonly abort = new AbortController();
 
   constructor(
-    private readonly req: Request,
+    _req: Request,
     private readonly res: Response,
   ) {
     res.status(200);
@@ -15,24 +17,23 @@ export class SseWriter {
     res.setHeader("Connection", "keep-alive");
     res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
-    req.on("close", () => {
-      this.closed = true;
-      this.abort.abort();
+    // `res` emits close when the socket goes away; `req` would fire as soon as the body is read.
+    res.on("close", () => {
+      if (!res.writableEnded) this.abort.abort();
     });
   }
 
+  /** True once the client went away or the response was ended. */
   get isClosed(): boolean {
-    return this.closed;
+    return this.abort.signal.aborted || this.res.writableEnded;
   }
 
   send(event: string, data: unknown): void {
-    if (this.closed) return;
+    if (this.isClosed) return;
     this.res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   }
 
   end(): void {
-    if (this.closed) return;
-    this.closed = true;
-    this.res.end();
+    if (!this.res.writableEnded) this.res.end();
   }
 }

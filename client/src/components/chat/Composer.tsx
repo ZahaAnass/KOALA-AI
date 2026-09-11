@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type Dra
 import { ArrowUp, BookText, FileSearch, Globe, ImagePlus, Link, Mic, MicOff, Sparkles, Square, Wrench, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { speechLang } from "@/i18n";
 import { uploadImage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useSpeechInput } from "@/hooks/useSpeech";
 import { useModels, useUser } from "@/hooks/useUser";
 import { useChatStore } from "@/store/chat";
 import { useUi } from "@/store/ui";
+import type { ImageRef } from "@/types/api";
 import { IconButton } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Feedback";
 import { ModelPicker } from "./ModelPicker";
@@ -18,13 +20,13 @@ export interface Attachment {
   file: File;
   preview: string;
   progress: number;
-  uploaded?: { filePath: string; url: string; mimeType: string };
+  uploaded?: ImageRef;
   error?: string;
 }
 
 interface ComposerProps {
   chatId?: string;
-  onSend: (text: string, images: Array<{ filePath: string; url: string; mimeType: string }>) => Promise<void>;
+  onSend: (text: string, images: ImageRef[]) => Promise<void>;
   onStop: () => void;
   streaming: boolean;
   autoFocus?: boolean;
@@ -34,7 +36,7 @@ const MAX_ATTACHMENTS = 4;
 
 /** Message input with attachments, voice, per-message toggles, model picker and quick tools. */
 export function Composer({ chatId, onSend, onStop, streaming, autoFocus }: ComposerProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: user } = useUser();
   const { data: modelsInfo } = useModels();
   const options = useChatStore((s) => s.options);
@@ -55,15 +57,18 @@ export function Composer({ chatId, onSend, onStop, streaming, autoFocus }: Compo
   const uploading = attachments.some((a) => !a.uploaded && !a.error);
   const canSend = !streaming && !uploading && !quotaReached && (text.trim().length > 0 || attachments.some((a) => a.uploaded));
 
-  // Pull queued text (templates, follow-ups, URL summaries) into the textarea.
+  // Pull queued text (templates, follow-ups, URL summaries) into the textarea. An empty insert only focuses.
   useEffect(() => {
     if (composerInsert === null) return;
     const inserted = consumeInsert();
-    if (inserted) {
-      setText((prev) => (prev ? `${prev}\n${inserted}` : inserted));
-      requestAnimationFrame(() => textareaRef.current?.focus());
-    }
+    if (inserted) setText((prev) => (prev ? `${prev}\n${inserted}` : inserted));
+    requestAnimationFrame(() => textareaRef.current?.focus());
   }, [composerInsert, consumeInsert]);
+
+  // Release object URLs of previews that were never sent.
+  const attachmentsRef = useRef(attachments);
+  attachmentsRef.current = attachments;
+  useEffect(() => () => attachmentsRef.current.forEach((a) => URL.revokeObjectURL(a.preview)), []);
 
   // Auto-grow the textarea.
   useEffect(() => {
@@ -91,14 +96,14 @@ export function Composer({ chatId, onSend, onStop, streaming, autoFocus }: Compo
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const speech = useSpeechInput(i18n.language === "fr" ? "fr-FR" : "en-US", (transcript, final) => {
+  const speech = useSpeechInput(speechLang(), (transcript, final) => {
     if (final) setText((prev) => `${prev.trimEnd()} ${transcript}`.trim());
   });
 
   const addFiles = useCallback(
     (files: FileList | File[]) => {
       if (!features?.imageUploads) {
-        toast.error("Image uploads are not configured on this server.");
+        toast.error(t("composer.uploadsDisabled"));
         return;
       }
       const images = Array.from(files).filter((f) => f.type.startsWith("image/"));
@@ -116,7 +121,7 @@ export function Composer({ chatId, onSend, onStop, streaming, autoFocus }: Compo
           });
       }
     },
-    [attachments.length, features?.imageUploads],
+    [attachments.length, features?.imageUploads, t],
   );
 
   const removeAttachment = (id: string) =>
@@ -216,7 +221,17 @@ export function Composer({ chatId, onSend, onStop, streaming, autoFocus }: Compo
         />
 
         <div className="flex items-center gap-1 px-1">
-          <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden onChange={(e) => e.target.files && addFiles(e.target.files)} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            multiple
+            hidden
+            onChange={(e) => {
+              if (e.target.files) addFiles(e.target.files);
+              e.target.value = ""; // allow picking the same file again
+            }}
+          />
           <IconButton size="sm" label={t("composer.attach")} onClick={() => fileInputRef.current?.click()} disabled={!features?.imageUploads || attachments.length >= MAX_ATTACHMENTS}>
             <ImagePlus />
           </IconButton>
@@ -274,6 +289,7 @@ function ToggleChip({ active, disabled, label, icon, onClick }: { active: boolea
     <button
       type="button"
       aria-pressed={active}
+      aria-label={label}
       disabled={disabled}
       title={label}
       onClick={onClick}

@@ -119,7 +119,7 @@ function Hero() {
 
         <div className="relative flex flex-col items-center gap-6">
           <div className="relative flex aspect-[4/3] w-full max-w-md items-center justify-center overflow-hidden rounded-[2.5rem] bg-[#140e2d]">
-            <div className="absolute inset-0 w-[200%] bg-[url('/bg.png')] bg-auto opacity-20 [animation:slide-bg_8s_ease-in-out_infinite_alternate]" />
+            <div className="absolute inset-0 w-[200%] bg-[url('/bg.png')] bg-auto opacity-20 animate-slide-bg" />
             <img src="/bot.png" alt="" className="relative h-4/5 animate-float object-contain drop-shadow-2xl" />
           </div>
           <div className="w-full lg:absolute lg:-bottom-10 lg:-right-6 lg:w-auto">
@@ -127,7 +127,6 @@ function Hero() {
           </div>
         </div>
       </div>
-      <style>{`@keyframes slide-bg { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
     </section>
   );
 }
@@ -191,8 +190,8 @@ function Screenshots() {
 function HowItWorks() {
   const { t } = useTranslation();
   const steps = [
-    { n: "1", title: t("nav.signUp"), text: t("common.signInRequired") },
-    { n: "2", title: t("nav.newChat"), text: t("dashboard.subtitle") },
+    { n: "1", title: t("nav.signUp"), text: t("landing.steps.signUp") },
+    { n: "2", title: t("nav.newChat"), text: t("landing.steps.chat") },
     { n: "3", title: t("landing.features.privacy.title"), text: t("landing.features.privacy.text") },
   ];
   return (
@@ -247,9 +246,9 @@ function Footer() {
           <span>{t("landing.footer")}</span>
         </div>
         <nav className="flex gap-5">
-          <Link to="/" className="hover:text-fg">Terms</Link>
-          <Link to="/" className="hover:text-fg">Privacy</Link>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="hover:text-fg">GitHub</a>
+          <Link to="/" className="hover:text-fg">{t("landing.footerLinks.terms")}</Link>
+          <Link to="/" className="hover:text-fg">{t("landing.footerLinks.privacy")}</Link>
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="hover:text-fg">{t("landing.footerLinks.github")}</a>
           <Link to="/contact" className="hover:text-fg">{t("nav.contact")}</Link>
         </nav>
       </div>

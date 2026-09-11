@@ -7,28 +7,12 @@ import { queryKeys } from "@/lib/queryClient";
 import { formatNumber } from "@/lib/utils";
 import { PageHeader, Skeleton, StatCard } from "@/components/ui/Feedback";
 import { SegmentedControl } from "@/components/ui/Form";
+import { QuotaBar } from "@/components/ui/QuotaBar";
+import { Section } from "@/components/ui/Section";
+import { ModelBars } from "@/components/analytics/ModelBars";
 import { UsageChart } from "@/components/analytics/UsageChart";
 
 type Range = "7" | "30" | "90";
-
-export function ModelBars({ models }: { models: Array<{ model: string; count: number }> }) {
-  const max = Math.max(1, ...models.map((m) => m.count));
-  return (
-    <ul className="flex flex-col gap-3">
-      {models.map((m) => (
-        <li key={m.model} className="flex flex-col gap-1">
-          <div className="flex justify-between text-sm">
-            <span className="truncate font-mono text-xs">{m.model}</span>
-            <span className="text-fg-muted">{formatNumber(m.count)}</span>
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-bg-muted">
-            <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-accent-500" style={{ width: `${(m.count / max) * 100}%` }} />
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export default function UsagePage() {
   const { t, i18n } = useTranslation();
@@ -47,6 +31,7 @@ export default function UsagePage() {
             value={range}
             onChange={setRange}
             size="sm"
+            aria-label={t("usage.title")}
             options={[
               { value: "7", label: t("usage.range7") },
               { value: "30", label: t("usage.range30") },
@@ -71,29 +56,15 @@ export default function UsagePage() {
             <StatCard label={t("usage.documents")} value={formatNumber(data.totals.documents, locale)} icon={<FileText />} />
           </div>
 
-          <section className="surface rounded-2xl p-5">
-            <h2 className="mb-4 font-display text-base font-semibold">{t("usage.perDay")}</h2>
+          <Section title={t("usage.perDay")}>
             <UsageChart data={data.series.map((s) => ({ day: s.day, a: s.user, b: s.model }))} labelA={t("usage.you")} labelB={t("usage.assistant")} />
-          </section>
+          </Section>
 
           <div className="grid gap-5 md:grid-cols-2">
-            <section className="surface rounded-2xl p-5">
-              <h2 className="mb-4 font-display text-base font-semibold">{t("usage.byModel")}</h2>
-              {data.models.length > 0 ? <ModelBars models={data.models} /> : <p className="text-sm text-fg-muted">—</p>}
-            </section>
-            <section className="surface rounded-2xl p-5">
-              <h2 className="mb-4 font-display text-base font-semibold">{t("settings.quotaTitle")}</h2>
-              {data.quota.limit === null ? (
-                <p className="text-sm text-fg-muted">{t("settings.quotaUnlimited")}</p>
-              ) : (
-                <>
-                  <p className="mb-3 text-sm text-fg-muted">{t("settings.quotaText", { used: data.quota.usedToday, limit: data.quota.limit })}</p>
-                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-bg-muted">
-                    <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${Math.min(100, (data.quota.usedToday / data.quota.limit) * 100)}%` }} />
-                  </div>
-                </>
-              )}
-            </section>
+            <Section title={t("usage.byModel")}>{data.models.length > 0 ? <ModelBars models={data.models} /> : <p className="text-sm text-fg-muted">—</p>}</Section>
+            <Section title={t("settings.quotaTitle")}>
+              <QuotaBar quota={data.quota} />
+            </Section>
           </div>
         </>
       )}

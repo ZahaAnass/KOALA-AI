@@ -10,11 +10,15 @@ import { badRequest, notFound } from "../utils/errors.js";
 import { fallbackTitle } from "../services/ai.js";
 import { assertHistoryLimit, buildUserMessage, streamAnswer } from "../services/chatStream.js";
 import { chatToJson, chatToMarkdown, chatToPdf } from "../services/export.js";
+import { isAllowedImagePath } from "../services/imagekit.js";
 
 const router = Router();
 router.use(requireAuth);
 
-const imageSchema = z.object({ filePath: z.string().min(1).max(500), mimeType: z.string().max(100).optional() });
+const imageSchema = z.object({
+  filePath: z.string().min(1).max(500).refine(isAllowedImagePath, { message: "Image path must point to a KOALA AI upload" }),
+  mimeType: z.string().max(100).optional(),
+});
 const optionsSchema = z
   .object({
     model: z.string().max(80).optional(),
@@ -153,11 +157,12 @@ router.get(
   }),
   asyncHandler(async (req, res) => {
     const { limit, before } = req.query as unknown as { limit: number; before?: number };
-    const chat = await Chat.findOne({ _id: req.params.id, userId: req.userId }).lean();
+    const chat = await Chat.findOne({ _id: req.params.id, userId: req.userId }, { ...CHAT_LIST_PROJECTION, systemInstruction: 1, messages: 1 }).lean();
     if (!chat) throw notFound("Chat not found");
     const total = chat.messages.length;
     const end = before === undefined ? total : Math.min(before, total);
     const start = Math.max(0, end - limit);
+    // Internal memory fields (summary, userId) are intentionally not exposed.
     const { messages, ...rest } = chat;
     res.json({
       ...rest,
@@ -216,8 +221,8 @@ router.post(
     const chat = await Chat.findOne({ _id: req.params.id, userId: req.userId });
     if (!chat) throw notFound("Chat not found");
     assertHistoryLimit(chat);
-    const userMessage = buildUserMessage(body.text, body.images);
-    chat.messages.push(userMessage);
+    const isFirstMessage = chat.messages.length === 0;
+    chat.messages.push(buildUserMessage(body.text, body.images));
     chat.messageCount = chat.messages.length;
     chat.lastMessageAt = new Date();
     await chat.save();
@@ -226,7 +231,7 @@ router.post(
       user: req.user!,
       userMessageIndex: chat.messages.length - 1,
       options: body.options,
-      generateTitle: chat.messages.length === 1,
+      generateTitle: isFirstMessage,
     });
   }),
 );
@@ -241,10 +246,15 @@ router.post(
     if (!chat) throw notFound("Chat not found");
     const idx = chat.messages.findIndex((m) => String(m._id) === req.params.messageId);
     if (idx < 0) throw notFound("Message not found");
-    // Regenerate answers the closest preceding user message.
+    // Regenerate answers the closest preceding user message; everything after it is discarded first.
     let userIdx = idx;
     while (userIdx >= 0 && chat.messages[userIdx]!.role !== "user") userIdx--;
     if (userIdx < 0) throw badRequest("No user message to answer");
+    if (userIdx < chat.messages.length - 1) {
+      chat.messages.splice(userIdx + 1);
+      chat.messageCount = chat.messages.length;
+      await chat.save();
+    }
     const { options } = req.body as { options: z.infer<typeof optionsSchema> };
     await streamAnswer(req, res, { chat, user: req.user!, userMessageIndex: userIdx, options });
   }),

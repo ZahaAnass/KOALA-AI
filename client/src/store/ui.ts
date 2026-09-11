@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { safeLocalStorage } from "@/lib/utils";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 import type { Theme } from "@/types/api";
 
 const storage = safeLocalStorage();
@@ -24,11 +25,11 @@ interface UiState {
 function applyTheme(theme: Theme): void {
   const dark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("dark", dark);
-  storage.set("koala:theme", theme);
+  storage.set(STORAGE_KEYS.theme, theme);
 }
 
-const initialTheme = ((storage.get("koala:theme") as Theme | null) ?? "system") satisfies Theme;
-const initialSidebar = storage.get("koala:sidebar") !== "closed" && window.innerWidth >= 1024;
+const initialTheme = ((storage.get(STORAGE_KEYS.theme) as Theme | null) ?? "system") satisfies Theme;
+const initialSidebar = storage.get(STORAGE_KEYS.sidebar) !== "closed" && window.innerWidth >= 1024;
 
 export const useUi = create<UiState>((set, get) => ({
   sidebarOpen: initialSidebar,
@@ -38,7 +39,7 @@ export const useUi = create<UiState>((set, get) => ({
   composerInsert: null,
 
   setSidebarOpen: (open) => {
-    storage.set("koala:sidebar", open ? "open" : "closed");
+    storage.set(STORAGE_KEYS.sidebar, open ? "open" : "closed");
     set({ sidebarOpen: open });
   },
   toggleSidebar: () => get().setSidebarOpen(!get().sidebarOpen),

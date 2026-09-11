@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactElement, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface MenuContextValue {
@@ -9,7 +9,7 @@ interface MenuContextValue {
 const MenuContext = createContext<MenuContextValue | null>(null);
 
 /**
- * Small dropdown menu with click-outside and Escape handling.
+ * Small dropdown menu with click-outside, Escape and arrow-key handling.
  *
  *   <Menu>
  *     <MenuTrigger><IconButton .../></MenuTrigger>
@@ -28,7 +28,9 @@ export function Menu({ children, className }: { children: ReactNode; className?:
     const onDown = (e: MouseEvent) => {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -52,36 +54,54 @@ function useMenu(): MenuContextValue {
   return ctx;
 }
 
-export function MenuTrigger({ children }: { children: ReactNode }) {
+type TriggerProps = { onClick?: (e: React.MouseEvent) => void; "aria-haspopup"?: string; "aria-expanded"?: boolean; "aria-controls"?: string };
+
+/** Wraps a single button element and attaches the menu ARIA attributes and toggle handler to it. */
+export function MenuTrigger({ children }: { children: ReactElement<TriggerProps> }) {
   const { open, setOpen, id } = useMenu();
-  return (
-    <div
-      aria-haspopup="menu"
-      aria-expanded={open}
-      aria-controls={id}
-      onClick={(e) => {
-        e.stopPropagation();
-        setOpen(!open);
-      }}
-      className="inline-flex"
-    >
-      {children}
-    </div>
-  );
+  const child = Children.only(children);
+  if (!isValidElement<TriggerProps>(child)) return null;
+  return cloneElement(child, {
+    "aria-haspopup": "menu",
+    "aria-expanded": open,
+    "aria-controls": open ? id : undefined,
+    onClick: (e: React.MouseEvent) => {
+      e.stopPropagation();
+      child.props.onClick?.(e);
+      setOpen(!open);
+    },
+  });
 }
+
+const ITEM_SELECTOR = '[role="menuitem"]:not([disabled])';
 
 export function MenuContent({ children, align = "end", className }: { children: ReactNode; align?: "start" | "end"; className?: string }) {
   const { open, id } = useMenu();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) ref.current?.querySelector<HTMLElement>(ITEM_SELECTOR)?.focus();
+  }, [open]);
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(ref.current?.querySelectorAll<HTMLElement>(ITEM_SELECTOR) ?? []);
+    if (items.length === 0) return;
+    const current = items.indexOf(document.activeElement as HTMLElement);
+    const moves: Record<string, number> = { ArrowDown: current + 1, ArrowUp: current - 1, Home: 0, End: items.length - 1 };
+    const next = moves[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    items[(next + items.length) % items.length]?.focus();
+  };
+
   if (!open) return null;
   return (
     <div
+      ref={ref}
       id={id}
       role="menu"
-      className={cn(
-        "surface absolute top-full z-50 mt-1.5 min-w-44 rounded-xl p-1.5 animate-fade-in",
-        align === "end" ? "right-0" : "left-0",
-        className,
-      )}
+      onKeyDown={onKeyDown}
+      className={cn("surface absolute top-full z-50 mt-1.5 min-w-44 rounded-xl p-1.5 animate-fade-in", align === "end" ? "right-0" : "left-0", className)}
     >
       {children}
     </div>

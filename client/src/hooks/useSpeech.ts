@@ -63,6 +63,9 @@ export function useSpeechInput(lang: string, onTranscript: (text: string, final:
 export function useSpeechOutput(lang: string) {
   const supported = typeof window !== "undefined" && "speechSynthesis" in window;
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  // Mirrors `speakingId` so `speak` keeps a stable identity (it is passed to memoized messages).
+  const speakingRef = useRef<string | null>(null);
+  speakingRef.current = speakingId;
 
   const stop = useCallback(() => {
     if (supported) window.speechSynthesis.cancel();
@@ -72,7 +75,7 @@ export function useSpeechOutput(lang: string) {
   const speak = useCallback(
     (id: string, text: string) => {
       if (!supported) return;
-      if (speakingId === id) return stop();
+      if (speakingRef.current === id) return stop();
       window.speechSynthesis.cancel();
       const clean = text.replace(/```[\s\S]*?```/g, " code block ").replace(/[*_#>`|]/g, "");
       const utterance = new SpeechSynthesisUtterance(clean);
@@ -82,7 +85,7 @@ export function useSpeechOutput(lang: string) {
       window.speechSynthesis.speak(utterance);
       setSpeakingId(id);
     },
-    [lang, speakingId, stop, supported],
+    [lang, stop, supported],
   );
 
   useEffect(() => stop, [stop]);

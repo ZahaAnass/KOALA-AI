@@ -5,12 +5,13 @@ import { api, ApiError } from "@/lib/api";
 import { queryClient, queryKeys } from "@/lib/queryClient";
 import { useChatStore, type ActiveGeneration } from "@/store/chat";
 import { useUi } from "@/store/ui";
-import type { ChatDetail, ChatListResponse, GenerateOptions, Message, StreamEvent } from "@/types/api";
+import i18n from "@/i18n";
+import type { ChatDetail, ChatListResponse, GenerateOptions, ImageRef, Message, StreamEvent } from "@/types/api";
 
 interface SendParams {
   chatId?: string;
   text: string;
-  images?: Array<{ filePath: string; mimeType: string; url: string }>;
+  images?: ImageRef[];
   options?: GenerateOptions;
 }
 
@@ -42,17 +43,17 @@ function commitToCache(active: ActiveGeneration, chatId: string, modelMessage: M
       const idx = messages.findIndex((m) => m._id === answeringMessageId);
       if (idx >= 0) messages = messages.slice(0, idx + 1);
       if (userMessage) messages = messages.map((m) => (m._id === answeringMessageId ? { ...m, text: userMessage.text, edited: true } : m));
-    } else if (userMessage) {
+    } else if (userMessage && !messages.some((m) => m._id === userMessageId)) {
       messages = [...messages, { ...userMessage, _id: userMessageId ?? userMessage._id }];
     }
     messages = [...messages, modelMessage];
     return { ...chat, title, messages, messageCount: messages.length, lastMessageAt: modelMessage.createdAt, page: { ...chat.page, end: messages.length, total: messages.length } };
   });
 
+  const total = queryClient.getQueryData<ChatDetail>(queryKeys.chat(chatId))?.messages.length;
   queryClient.setQueriesData<ChatListResponse>({ queryKey: ["chats"], exact: false }, (list) => {
     if (!list || !("items" in list)) return list;
-    const exists = list.items.some((c) => c._id === chatId);
-    const items = exists ? list.items.map((c) => (c._id === chatId ? { ...c, title, lastMessageAt: modelMessage.createdAt, messageCount: c.messageCount + 2 } : c)) : list.items;
+    const items = list.items.map((c) => (c._id === chatId ? { ...c, title, lastMessageAt: modelMessage.createdAt, messageCount: total ?? c.messageCount } : c));
     return { ...list, items };
   });
 }
@@ -100,14 +101,14 @@ async function runGeneration(events: AsyncGenerator<StreamEvent>, onChatId?: (id
       useChatStore.getState().finish();
       return;
     }
-    const message = err instanceof ApiError ? err.message : "Connection lost. Please try again.";
+    const message = err instanceof ApiError ? err.message : i18n.t("common.connectionLost");
     const active = useChatStore.getState().active;
     if (active?.userMessageId) {
       failAfterPersist(message);
     } else {
       // The request never reached the server: give the text back to the user.
       if (active?.userMessage?.text) useUi.getState().insertIntoComposer(active.userMessage.text);
-      useChatStore.getState().clear();
+      useChatStore.getState().finish();
     }
     toast.error(message);
   } finally {

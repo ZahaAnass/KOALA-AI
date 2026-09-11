@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
 import type { Request, Response } from "express";
-import { Chat, type ChatDoc, type MessageDoc } from "../models/Chat.js";
+import { Chat, type ChatDoc, type MessageDoc, type PlainMessage } from "../models/Chat.js";
 import type { UserDoc } from "../models/User.js";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
@@ -10,8 +9,9 @@ import { badRequest } from "../utils/errors.js";
 import { MEMORY, generateFollowUps, generateTitle, summarizeTurns } from "./ai.js";
 import { buildRagPrompt, retrieveContext } from "./documents.js";
 import { fetchImageAsBase64, imageUrl } from "./imagekit.js";
+import { makeMessage, serializeMessage } from "./messages.js";
 import { resolveModel } from "./providers/index.js";
-import type { ChatTurn, Source, ToolCallRecord, Usage } from "./providers/types.js";
+import type { ChatProvider, ChatTurn, ModelInfo, Source, StreamEvent, ToolCallRecord, Usage } from "./providers/types.js";
 
 export interface IncomingImage {
   filePath: string;
@@ -28,10 +28,57 @@ export interface GenerateOptions {
   maxOutputTokens?: number | undefined;
 }
 
+export interface RunParams {
+  chat: ChatDoc;
+  user: UserDoc;
+  /** Index of the user message in chat.messages that the model should answer. It must be the last message. */
+  userMessageIndex: number;
+  options: GenerateOptions;
+  /** When true, generate a title after the exchange. */
+  generateTitle?: boolean;
+}
+
 const DEFAULT_SYSTEM = `You are KOALA AI, a helpful, precise and friendly assistant. Format answers in Markdown: use headings sparingly, code blocks with a language tag, tables for tabular data and LaTeX ($...$ or $$...$$) for math. Answer in the user's language.`;
+const MAX_IMAGES_PER_MESSAGE = 4;
+const MIN_ANSWER_LENGTH_FOR_FOLLOW_UPS = 40;
+const STOPPED_TEXT = "_Generation stopped._";
+const EMPTY_TEXT = "_The model returned an empty response. Try rephrasing or adjusting the safety level._";
+
+interface ResolvedOptions {
+  provider: ChatProvider;
+  model: ModelInfo;
+  webSearch: boolean;
+  tools: boolean;
+  useDocuments: boolean;
+  temperature: number;
+  maxOutputTokens: number;
+}
+
+interface StreamResult {
+  text: string;
+  sources: Source[];
+  toolCalls: ToolCallRecord[];
+  usage: Usage;
+  stopped: boolean;
+}
 
 function toTurn(m: Pick<MessageDoc, "role" | "text">, images?: Array<{ mimeType: string; data: string }>): ChatTurn {
   return { role: m.role, text: m.text, ...(images?.length ? { images } : {}) };
+}
+
+function resolveOptions(chat: ChatDoc, user: UserDoc, options: GenerateOptions): ResolvedOptions {
+  const settings = user.settings;
+  const { provider, model } = resolveModel(options.model ?? chat.model ?? settings.model);
+  const webSearch = Boolean(options.webSearch ?? settings.webSearch) && model.supportsWebSearch;
+  return {
+    provider,
+    model,
+    webSearch,
+    tools: Boolean(options.tools ?? settings.tools) && model.supportsTools && !webSearch,
+    useDocuments: Boolean(options.useDocuments ?? settings.useDocuments),
+    temperature: options.temperature ?? settings.temperature,
+    maxOutputTokens: options.maxOutputTokens ?? settings.maxOutputTokens,
+  };
 }
 
 /** Assembles the history sent to the model, applying rolling-summary memory for long chats. */
@@ -43,20 +90,18 @@ async function buildHistory(chat: ChatDoc, upToIndex: number): Promise<{ history
   const unsummarizedBeyondWindow = msgs.length - MEMORY.recentWindow - summarizedUpTo;
   if (unsummarizedBeyondWindow >= MEMORY.summarizeEvery) {
     const cutoff = msgs.length - MEMORY.recentWindow;
-    const turns = msgs.slice(summarizedUpTo, cutoff).map((m) => toTurn(m));
-    summary = await summarizeTurns(summary, turns);
+    summary = await summarizeTurns(summary, msgs.slice(summarizedUpTo, cutoff).map((m) => toTurn(m)));
     summarizedUpTo = cutoff;
   }
 
-  const recent = msgs.slice(Math.max(summarizedUpTo, msgs.length - MEMORY.recentWindow));
   // Older images are dropped from context to keep requests small; text stays.
-  const history = recent.map((m) => toTurn(m));
-  return { history, summary, summarizedUpTo };
+  const recent = msgs.slice(Math.max(summarizedUpTo, msgs.length - MEMORY.recentWindow));
+  return { history: recent.map((m) => toTurn(m)), summary, summarizedUpTo };
 }
 
 async function loadImages(images: IncomingImage[]): Promise<Array<{ mimeType: string; data: string }>> {
   const out: Array<{ mimeType: string; data: string }> = [];
-  for (const img of images.slice(0, 4)) {
+  for (const img of images.slice(0, MAX_IMAGES_PER_MESSAGE)) {
     try {
       out.push(await fetchImageAsBase64(img.filePath, img.mimeType));
     } catch (err) {
@@ -66,167 +111,130 @@ async function loadImages(images: IncomingImage[]): Promise<Array<{ mimeType: st
   return out;
 }
 
-export interface RunParams {
-  chat: ChatDoc;
-  user: UserDoc;
-  /** Index of the user message in chat.messages that the model should answer. */
-  userMessageIndex: number;
-  options: GenerateOptions;
-  /** When true, generate a title after the first exchange. */
-  generateTitle?: boolean;
+/** Retrieves document excerpts for the question and returns the prompt section plus source refs. */
+async function documentContext(userId: string, question: string, documentIds: string[]): Promise<{ prompt: string; sources: Source[] }> {
+  if (!question) return { prompt: "", sources: [] };
+  const chunks = await retrieveContext(userId, question, { documentIds, topK: 6 });
+  const seen = new Set<string>();
+  const sources = chunks
+    .filter((c) => (seen.has(c.documentId) ? false : (seen.add(c.documentId), true)))
+    .map((c) => ({ title: c.documentName, uri: `document:${c.documentId}` }));
+  return { prompt: buildRagPrompt(chunks), sources };
+}
+
+/** Consumes provider events, forwarding them over SSE and accumulating the final answer. */
+async function consumeStream(events: AsyncGenerator<StreamEvent>, sse: SseWriter, initialSources: Source[]): Promise<StreamResult> {
+  const result: StreamResult = { text: "", sources: [...initialSources], toolCalls: [], usage: { promptTokens: 0, candidateTokens: 0, totalTokens: 0 }, stopped: false };
+  try {
+    for await (const ev of events) {
+      if (sse.isClosed) break;
+      switch (ev.type) {
+        case "text":
+          result.text += ev.text;
+          sse.send("chunk", { text: ev.text });
+          break;
+        case "sources":
+          result.sources.push(...ev.sources);
+          sse.send("sources", { sources: ev.sources });
+          break;
+        case "tool":
+          result.toolCalls.push(ev.call);
+          sse.send("tool", ev.call);
+          break;
+        case "usage":
+          result.usage = ev.usage;
+          break;
+      }
+    }
+  } catch (err) {
+    if (!sse.abort.signal.aborted) throw err;
+  }
+  result.stopped = sse.abort.signal.aborted;
+  return result;
+}
+
+/** Appends the model answer atomically so concurrent writers on the same chat are not overwritten. */
+async function persistAnswer(chat: ChatDoc, modelMessage: PlainMessage, memory: { summary: string; summarizedUpTo: number }, model: string, title?: string) {
+  await Chat.updateOne(
+    { _id: chat._id },
+    {
+      $push: { messages: modelMessage },
+      $inc: { messageCount: 1 },
+      $set: { lastMessageAt: modelMessage.createdAt, summary: memory.summary, summarizedUpTo: memory.summarizedUpTo, model, ...(title ? { title } : {}) },
+    },
+    { runValidators: true },
+  );
 }
 
 /**
- * Streams a model answer for the user message at `userMessageIndex`, persists it and
- * emits SSE events: `meta`, `chunk`, `sources`, `tool`, `done`, `error`.
+ * Streams a model answer for the user message at `userMessageIndex` (the last message of the chat),
+ * persists it and emits SSE events: `meta`, `chunk`, `sources`, `tool`, `done`, `error`.
  */
 export async function streamAnswer(req: Request, res: Response, params: RunParams): Promise<void> {
   const { chat, user, options } = params;
   const sse = new SseWriter(req, res);
   const userMsg = chat.messages[params.userMessageIndex];
-  if (!userMsg || userMsg.role !== "user") {
+  if (!userMsg || userMsg.role !== "user" || params.userMessageIndex !== chat.messages.length - 1) {
     sse.send("error", { message: "Invalid message to answer" });
     sse.end();
     return;
   }
 
-  const settings = user.settings;
-
   try {
-    const { provider, model } = resolveModel(options.model ?? chat.model ?? settings.model);
-    const webSearch = Boolean(options.webSearch ?? settings.webSearch) && model.supportsWebSearch;
-    const tools = Boolean(options.tools ?? settings.tools) && model.supportsTools && !webSearch;
-    const useDocuments = Boolean(options.useDocuments ?? settings.useDocuments);
-
+    const opts = resolveOptions(chat, user, options);
     sse.send("meta", {
       chatId: String(chat._id),
       userMessageId: String(userMsg._id),
-      model: model.id,
-      webSearch,
-      tools,
-      useDocuments,
+      model: opts.model.id,
+      webSearch: opts.webSearch,
+      tools: opts.tools,
+      useDocuments: opts.useDocuments,
     });
 
     const { history, summary, summarizedUpTo } = await buildHistory(chat, params.userMessageIndex);
-
     const systemParts = [DEFAULT_SYSTEM];
-    const custom = chat.systemInstruction || settings.systemInstruction;
+    const custom = chat.systemInstruction || user.settings.systemInstruction;
     if (custom) systemParts.push(`User instructions:\n${custom}`);
     if (summary) systemParts.push(`Memory of earlier conversation:\n${summary}`);
 
     let ragSources: Source[] = [];
-    if (useDocuments && userMsg.text) {
-      const chunks = await retrieveContext(user.clerkId, userMsg.text, { documentIds: options.documentIds ?? [], topK: 6 });
-      if (chunks.length) {
-        systemParts.push(buildRagPrompt(chunks));
-        const seen = new Set<string>();
-        ragSources = chunks
-          .filter((c) => (seen.has(c.documentId) ? false : (seen.add(c.documentId), true)))
-          .map((c) => ({ title: c.documentName, uri: `document:${c.documentId}` }));
+    if (opts.useDocuments) {
+      const ctx = await documentContext(user.clerkId, userMsg.text, options.documentIds ?? []);
+      if (ctx.prompt) {
+        systemParts.push(ctx.prompt);
+        ragSources = ctx.sources;
         sse.send("sources", { sources: ragSources });
       }
     }
 
     const images = await loadImages(userMsg.images ?? []);
-    const message = toTurn(userMsg, images);
-
-    let text = "";
-    const sources: Source[] = [...ragSources];
-    const toolCalls: ToolCallRecord[] = [];
-    let usage: Usage = { promptTokens: 0, candidateTokens: 0, totalTokens: 0 };
-
-    const stream = provider.stream({
-      model: model.id,
+    const events = opts.provider.stream({
+      model: opts.model.id,
       systemInstruction: systemParts.join("\n\n"),
       history,
-      message,
-      temperature: options.temperature ?? settings.temperature,
-      maxOutputTokens: options.maxOutputTokens ?? settings.maxOutputTokens,
-      safetyLevel: settings.safetyLevel,
-      webSearch,
-      tools,
+      message: toTurn(userMsg, images),
+      temperature: opts.temperature,
+      maxOutputTokens: opts.maxOutputTokens,
+      safetyLevel: user.settings.safetyLevel,
+      webSearch: opts.webSearch,
+      tools: opts.tools,
       signal: sse.abort.signal,
     });
 
-    for await (const ev of stream) {
-      if (sse.isClosed) break;
-      switch (ev.type) {
-        case "text":
-          text += ev.text;
-          sse.send("chunk", { text: ev.text });
-          break;
-        case "sources":
-          sources.push(...ev.sources);
-          sse.send("sources", { sources: ev.sources });
-          break;
-        case "tool":
-          toolCalls.push(ev.call);
-          sse.send("tool", ev.call);
-          break;
-        case "usage":
-          usage = ev.usage;
-          break;
-      }
-    }
+    const result = await consumeStream(events, sse, ragSources);
+    const text = result.text.trim() ? result.text : result.stopped ? STOPPED_TEXT : EMPTY_TEXT;
+    const modelMessage = makeMessage({ role: "model", text, sources: result.sources, toolCalls: result.toolCalls, model: opts.model.id, usage: result.usage });
 
-    const stopped = sse.isClosed;
-    if (!text.trim() && !stopped) text = "_The model returned an empty response. Try rephrasing or adjusting the safety level._";
-    if (!text.trim() && stopped) text = "_Generation stopped._";
+    const title = params.generateTitle ? await generateTitle(userMsg.text, text) : undefined;
+    await persistAnswer(chat, modelMessage, { summary, summarizedUpTo }, opts.model.id, title);
+    await recordUsage(user.clerkId, result.usage.totalTokens);
 
-    const modelMessage = {
-      _id: new mongoose.Types.ObjectId(),
-      role: "model" as const,
-      text,
-      images: [],
-      sources,
-      toolCalls,
-      model: model.id,
-      feedback: null,
-      feedbackNote: "",
-      usage,
-      edited: false,
-      createdAt: new Date(),
-    };
-
-    // Persist: truncate anything after the answered user message, then append the answer.
-    const kept = chat.messages.slice(0, params.userMessageIndex + 1);
-    const update: Record<string, unknown> = {
-      messages: [...kept, modelMessage],
-      messageCount: kept.length + 1,
-      lastMessageAt: new Date(),
-      summary,
-      summarizedUpTo,
-      model: model.id,
-    };
-
-    let title = chat.title;
-    if (params.generateTitle) {
-      title = await generateTitle(userMsg.text, text);
-      update.title = title;
-    }
-    await Chat.updateOne({ _id: chat._id }, { $set: update }, { runValidators: true });
-    await recordUsage(user.clerkId, usage.totalTokens);
-
-    let followUps: string[] = [];
-    if (settings.followUps && !stopped && text.length > 40) {
-      followUps = await generateFollowUps(userMsg.text, text);
-    }
-
-    sse.send("done", {
-      chatId: String(chat._id),
-      message: { ...modelMessage, _id: String(modelMessage._id) },
-      title,
-      followUps,
-      usage,
-    });
+    if (result.stopped) return;
+    const followUps = user.settings.followUps && text.length > MIN_ANSWER_LENGTH_FOR_FOLLOW_UPS ? await generateFollowUps(userMsg.text, text) : [];
+    sse.send("done", { chatId: String(chat._id), message: serializeMessage(modelMessage), title: title ?? chat.title, followUps, usage: result.usage });
   } catch (err) {
-    if (sse.abort.signal.aborted) {
-      logger.debug("Client aborted generation");
-    } else {
-      logger.error({ err }, "Generation failed");
-      const message = err instanceof Error ? err.message : "Generation failed";
-      sse.send("error", { message: friendlyError(message) });
-    }
+    logger.error({ err }, "Generation failed");
+    sse.send("error", { message: friendlyError(err instanceof Error ? err.message : "Generation failed") });
   } finally {
     sse.end();
   }
@@ -240,22 +248,13 @@ function friendlyError(message: string): string {
 }
 
 /** Builds a user message subdocument from request input. */
-export function buildUserMessage(text: string, images: IncomingImage[] = []) {
+export function buildUserMessage(text: string, images: IncomingImage[] = []): PlainMessage {
   if (!text.trim() && images.length === 0) throw badRequest("Message text or an image is required");
-  return {
-    _id: new mongoose.Types.ObjectId(),
-    role: "user" as const,
+  return makeMessage({
+    role: "user",
     text: text.trim(),
     images: images.map((i) => ({ filePath: i.filePath, mimeType: i.mimeType ?? "image/png", url: imageUrl(i.filePath) })),
-    sources: [],
-    toolCalls: [],
-    model: "",
-    feedback: null,
-    feedbackNote: "",
-    usage: { promptTokens: 0, candidateTokens: 0, totalTokens: 0 },
-    edited: false,
-    createdAt: new Date(),
-  };
+  });
 }
 
 export function assertHistoryLimit(chat: ChatDoc): void {

@@ -1,5 +1,8 @@
 {
-  "app": { "name": "KOALA AI", "tagline": "Your friendly AI assistant" },
+  "app": {
+    "name": "KOALA AI",
+    "tagline": "Your friendly AI assistant"
+  },
   "nav": {
     "newChat": "New chat",
     "search": "Search chats",
@@ -15,8 +18,6 @@
     "signUp": "Get started",
     "archived": "Archived",
     "pinned": "Pinned",
-    "folders": "Folders",
-    "tags": "Tags",
     "recent": "Recent",
     "today": "Today",
     "yesterday": "Yesterday",
@@ -25,12 +26,19 @@
     "older": "Older",
     "noChats": "No chats yet",
     "noChatsHint": "Start a conversation and it will show up here.",
-    "toggleSidebar": "Toggle sidebar",
-    "upgrade": "KOALA AI Pro",
-    "upgradeHint": "Unlimited messages and priority models"
+    "toggleSidebar": "Toggle sidebar"
   },
-  "theme": { "label": "Theme", "system": "System", "light": "Light", "dark": "Dark" },
-  "language": { "label": "Language", "en": "English", "fr": "Français" },
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fr": "Français"
+  },
   "composer": {
     "placeholder": "Ask anything…",
     "placeholderDoc": "Ask about your documents…",
@@ -50,7 +58,9 @@
     "hint": "Enter to send · Shift+Enter for a new line",
     "quota": "{{remaining}} of {{limit}} messages left today",
     "quotaReached": "You reached today's message limit.",
-    "uploading": "Uploading…"
+    "uploadsDisabled": "Image uploads are not configured on this server.",
+    "imagePromptPlaceholder": "A watercolor koala coding on a laptop, soft morning light",
+    "urlPlaceholder": "https://example.com/article"
   },
   "message": {
     "copy": "Copy",
@@ -65,7 +75,6 @@
     "toolUsed": "Used tool",
     "tokens": "{{count}} tokens",
     "edited": "edited",
-    "thinking": "Thinking…",
     "followUps": "Suggested follow-ups",
     "you": "You",
     "assistant": "KOALA AI",
@@ -73,7 +82,8 @@
     "cancel": "Cancel",
     "copyCode": "Copy code",
     "document": "Document",
-    "generationStopped": "Generation stopped."
+    "diagramError": "Could not render diagram",
+    "attachedImage": "Attached image"
   },
   "chat": {
     "rename": "Rename",
@@ -104,30 +114,46 @@
     "selectMode": "Select",
     "selected": "{{count}} selected",
     "deleteSelected": "Delete selected",
-    "clearAll": "Clear all history",
     "clearAllConfirm": "Delete ALL of your chats? This cannot be undone.",
     "notFound": "This chat does not exist.",
-    "titleUpdated": "Title updated",
     "addTag": "Add tag",
     "chatSettings": "Chat settings",
     "instructions": "Custom instructions for this chat",
-    "modelForChat": "Model for this chat"
+    "modelForChat": "Model for this chat",
+    "shared": "Shared",
+    "moreActions": "More actions"
   },
   "dashboard": {
     "greeting": "Hi{{name}}, what can I help with?",
     "subtitle": "Ask a question, drop an image, or pick a suggestion.",
     "cards": {
-      "chat": { "title": "Create a new chat", "text": "Ask anything in your language." },
-      "image": { "title": "Analyze images", "text": "Upload a photo or screenshot." },
-      "code": { "title": "Help me with code", "text": "Explain, debug or write tests." },
-      "docs": { "title": "Talk to documents", "text": "Upload PDFs and ask questions." }
+      "chat": {
+        "title": "Create a new chat",
+        "text": "Ask anything in your language."
+      },
+      "image": {
+        "title": "Analyze images",
+        "text": "Upload a photo or screenshot."
+      },
+      "code": {
+        "title": "Help me with code",
+        "text": "Explain, debug or write tests."
+      },
+      "docs": {
+        "title": "Talk to documents",
+        "text": "Upload PDFs and ask questions."
+      }
     },
     "suggestions": [
       "Explain quantum computing like I'm 12",
       "Write a polite email declining a meeting",
       "What's the weather in Casablanca today?",
       "Give me a 20-minute bodyweight workout"
-    ]
+    ],
+    "inserts": {
+      "image": "Describe what you see in this image: ",
+      "code": "Help me with this code:\n\n```\n\n```"
+    }
   },
   "search": {
     "title": "Search",
@@ -147,7 +173,6 @@
     "title": "Settings",
     "general": "General",
     "model": "Model & behaviour",
-    "privacy": "Data & privacy",
     "defaultModel": "Default model",
     "systemInstruction": "Custom instructions",
     "systemInstructionHint": "Tell KOALA how to respond: tone, format, persona, things to remember.",
@@ -253,10 +278,10 @@
     "deleteUserConfirm": "Delete this user and all their data?",
     "default": "default",
     "updated": "User updated",
-    "forbidden": "This page is reserved for administrators."
+    "forbidden": "This page is reserved for administrators.",
+    "userActions": "User actions"
   },
   "share": {
-    "title": "Shared conversation",
     "readOnly": "Read-only · shared from KOALA AI",
     "cta": "Start your own chat",
     "notFound": "This shared chat does not exist or was revoked."
@@ -268,26 +293,65 @@
     "ctaSecondary": "See features",
     "features": {
       "title": "Everything you need from an assistant",
-      "chat": { "title": "Streaming chat", "text": "Instant Markdown answers with code, tables and math." },
-      "vision": { "title": "Image understanding", "text": "Drop screenshots or photos and ask about them." },
-      "search": { "title": "Web search", "text": "Grounded answers with cited sources." },
-      "docs": { "title": "Talk to your files", "text": "Upload PDFs and get answers with references." },
-      "tools": { "title": "Tools", "text": "Calculator, weather and time, called automatically." },
-      "privacy": { "title": "Your data, your call", "text": "Export, share or delete everything in one click." }
+      "chat": {
+        "title": "Streaming chat",
+        "text": "Instant Markdown answers with code, tables and math."
+      },
+      "vision": {
+        "title": "Image understanding",
+        "text": "Drop screenshots or photos and ask about them."
+      },
+      "search": {
+        "title": "Web search",
+        "text": "Grounded answers with cited sources."
+      },
+      "docs": {
+        "title": "Talk to your files",
+        "text": "Upload PDFs and get answers with references."
+      },
+      "tools": {
+        "title": "Tools",
+        "text": "Calculator, weather and time, called automatically."
+      },
+      "privacy": {
+        "title": "Your data, your call",
+        "text": "Export, share or delete everything in one click."
+      }
     },
     "demo": "Try the live demo",
     "openSource": "Open source on GitHub",
-    "footer": "Built with React, Express, MongoDB and Gemini."
+    "footer": "Built with React, Express, MongoDB and Gemini.",
+    "footerLinks": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "github": "GitHub"
+    },
+    "steps": {
+      "signUp": "Create a free account in seconds.",
+      "chat": "Ask a question, drop an image or pick a suggestion."
+    }
   },
   "onboarding": {
     "skip": "Skip",
     "next": "Next",
     "done": "Let's go",
     "steps": [
-      { "title": "Welcome to KOALA AI 🐨", "text": "Ask anything in the composer below. Answers stream in real time with rich formatting." },
-      { "title": "Attach images and files", "text": "Drop an image into the composer or upload documents to chat with them." },
-      { "title": "Search, tools & memory", "text": "Toggle web search and tools per message. Long chats are summarized automatically." },
-      { "title": "Make it yours", "text": "Pick a model, set custom instructions, switch theme and language in Settings. Press {{mod}}+K anytime." }
+      {
+        "title": "Welcome to KOALA AI 🐨",
+        "text": "Ask anything in the composer below. Answers stream in real time with rich formatting."
+      },
+      {
+        "title": "Attach images and files",
+        "text": "Drop an image into the composer or upload documents to chat with them."
+      },
+      {
+        "title": "Search, tools & memory",
+        "text": "Toggle web search and tools per message. Long chats are summarized automatically."
+      },
+      {
+        "title": "Make it yours",
+        "text": "Pick a model, set custom instructions, switch theme and language in Settings. Press {{mod}}+K anytime."
+      }
     ]
   },
   "common": {
@@ -297,7 +361,6 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "close": "Close",
-    "back": "Back",
     "error": "Something went wrong",
     "retry": "Retry",
     "offline": "You are offline",
@@ -305,10 +368,8 @@
     "notFound": "Page not found",
     "notFoundHint": "The page you are looking for does not exist.",
     "goHome": "Go home",
-    "yes": "Yes",
-    "no": "No",
-    "optional": "optional",
-    "signInRequired": "Please sign in to continue."
+    "connectionLost": "Connection lost. Please try again.",
+    "requestFailed": "Request failed"
   },
   "contact": {
     "title": "Contact",
@@ -321,5 +382,15 @@
     "linkedinText": "Connect professionally",
     "build": "Let's build together",
     "buildText": "KOALA AI is open source and constantly evolving. Contributions are welcome."
+  },
+  "upload": {
+    "unsupportedType": "Unsupported image type. Use PNG, JPG, WEBP or GIF.",
+    "tooLarge": "Image is too large (max {{max}} MB).",
+    "failed": "Image upload failed",
+    "badResponse": "Unexpected upload response",
+    "networkError": "Network error during upload"
+  },
+  "tools": {
+    "summarizePrompt": "Summarize the following web page in a few bullet points, then list the key takeaways.\n\nTitle: {{title}}\nURL: {{url}}\n\n{{text}}"
   }
 }

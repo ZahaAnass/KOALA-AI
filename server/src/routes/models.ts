@@ -15,7 +15,8 @@ router.get("/", requireAuth, (_req, res) => {
     features: {
       imageUploads: imageKitConfigured(),
       imageGeneration: gemini.isConfigured(),
-      documents: gemini.isConfigured(),
+      // Documents always work; without Gemini retrieval falls back to keyword search.
+      documents: true,
       webSearch: gemini.isConfigured(),
       tools: gemini.isConfigured(),
     },

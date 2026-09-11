@@ -217,6 +217,7 @@ function FilterChip({ active, onClick, icon, children }: { active: boolean; onCl
 }
 
 function ChatGroup({ label, items, currentId, selecting, selected, onToggle, onOpen }: { label: string; items: ChatSummary[]; currentId?: string; selecting: boolean; selected: Set<string>; onToggle: (id: string) => void; onOpen: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="mb-2">
       <div className="px-2 py-1 text-[11px] font-medium text-fg-subtle">{label}</div>
@@ -226,14 +227,18 @@ function ChatGroup({ label, items, currentId, selecting, selected, onToggle, onO
         return (
           <div key={chat._id} className={cn("group/item relative flex items-center rounded-lg pr-1 transition-colors", active ? "bg-bg-hover" : "hover:bg-bg-hover")}>
             {selecting && (
-              <button type="button" onClick={() => onToggle(chat._id)} aria-label={chat.title} className="pl-2 text-fg-muted">
+              <button type="button" role="checkbox" aria-checked={checked} onClick={() => onToggle(chat._id)} aria-label={chat.title} className="pl-2 text-fg-muted">
                 {checked ? <CheckSquare className="size-4 text-brand-500" /> : <Square className="size-4" />}
               </button>
             )}
             <NavLink to={`/dashboard/chats/${chat._id}`} onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-2 text-sm">
               {chat.pinned && <Pin className="size-3 shrink-0 text-brand-500" />}
               <span className={cn("truncate", active ? "text-fg" : "text-fg-muted group-hover/item:text-fg")}>{chat.title}</span>
-              {chat.shareToken && <span className="ml-auto size-1.5 shrink-0 rounded-full bg-emerald-500" title="Shared" />}
+              {chat.shareToken && (
+                <span className="ml-auto size-1.5 shrink-0 rounded-full bg-emerald-500">
+                  <span className="sr-only">{t("chat.shared")}</span>
+                </span>
+              )}
             </NavLink>
             <div className={cn("opacity-0 transition-opacity group-hover/item:opacity-100 focus-within:opacity-100", active && "opacity-100")}>
               <ChatMenu chat={chat} isCurrent={active} />

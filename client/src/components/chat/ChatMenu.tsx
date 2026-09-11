@@ -4,7 +4,7 @@ import { Archive, ArchiveRestore, Download, FolderInput, Link2, MoreHorizontal, 
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { downloadExport, useChatMeta, useDeleteChat, useUpdateChat } from "@/hooks/useChats";
-import type { ChatSummary } from "@/types/api";
+import type { ChatWithInstructions } from "@/types/api";
 import { cn } from "@/lib/utils";
 import { IconButton } from "@/components/ui/Button";
 import { ConfirmDialog, Dialog, PromptDialog } from "@/components/ui/Dialog";
@@ -14,7 +14,7 @@ import { ChatSettingsDialog, ShareDialog, TagsDialog } from "./ChatDialogs";
 type DialogKind = "rename" | "delete" | "share" | "tags" | "folder" | "settings" | null;
 
 interface ChatMenuProps {
-  chat: ChatSummary & { systemInstruction?: string };
+  chat: ChatWithInstructions;
   /** Whether the menu is shown for the currently open chat (delete navigates away). */
   isCurrent?: boolean;
   className?: string;
@@ -44,7 +44,7 @@ export function ChatMenu({ chat, isCurrent, className }: ChatMenuProps) {
     <>
       <Menu className={className}>
         <MenuTrigger>
-          <IconButton size="sm" label={t("chat.chatSettings")}>
+          <IconButton size="sm" label={t("chat.moreActions")}>
             <MoreHorizontal />
           </IconButton>
         </MenuTrigger>

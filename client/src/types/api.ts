@@ -58,6 +58,9 @@ export interface ChatSummary {
   snippet?: string;
 }
 
+/** A chat summary that may carry per-chat instructions (detail view or sidebar item). */
+export type ChatWithInstructions = ChatSummary & { systemInstruction?: string };
+
 export interface ChatDetail extends ChatSummary {
   systemInstruction: string;
   messages: Message[];

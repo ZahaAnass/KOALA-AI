@@ -1,7 +1,7 @@
 import { UserButton } from "@clerk/clerk-react";
 import { Languages, Moon, PanelLeft, Sun, SunMoon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { setLocale, type SupportedLocale } from "@/i18n";
+import { currentLocale, setLocale, type SupportedLocale } from "@/i18n";
 import { useUpdateSettings } from "@/hooks/useUser";
 import { useUi } from "@/store/ui";
 import type { Theme } from "@/types/api";
@@ -15,13 +15,13 @@ interface HeaderProps {
 }
 
 export function Header({ title, actions }: HeaderProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const toggleSidebar = useUi((s) => s.toggleSidebar);
   const sidebarOpen = useUi((s) => s.sidebarOpen);
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-bg/80 px-3 backdrop-blur">
-      <IconButton label={t("nav.toggleSidebar")} onClick={toggleSidebar} active={false} className={sidebarOpen ? "lg:hidden" : ""}>
+      <IconButton label={t("nav.toggleSidebar")} onClick={toggleSidebar} className={sidebarOpen ? "lg:hidden" : ""}>
         <PanelLeft />
       </IconButton>
       {!sidebarOpen && (
@@ -35,13 +35,13 @@ export function Header({ title, actions }: HeaderProps) {
         {actions}
       </div>
       <ThemeToggle />
-      <LanguageToggle current={i18n.language.startsWith("fr") ? "fr" : "en"} />
+      <LanguageToggle current={currentLocale()} />
       <UserButton appearance={{ elements: { avatarBox: "size-8" } }} />
     </header>
   );
 }
 
-export function ThemeToggle() {
+function ThemeToggle() {
   const { t } = useTranslation();
   const theme = useUi((s) => s.theme);
   const setTheme = useUi((s) => s.setTheme);
@@ -70,7 +70,7 @@ export function ThemeToggle() {
   );
 }
 
-export function LanguageToggle({ current }: { current: SupportedLocale }) {
+function LanguageToggle({ current }: { current: SupportedLocale }) {
   const { t } = useTranslation();
   const update = useUpdateSettings();
   const choose = (locale: SupportedLocale) => {

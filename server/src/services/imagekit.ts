@@ -20,9 +20,16 @@ export function imagekit(): ImageKit {
   return client;
 }
 
+/** Folder under which every KOALA AI upload lives; anything outside is refused. */
+export const UPLOAD_ROOT = "/koala-ai/";
+
+/** True for ImageKit paths produced by our own uploads (no absolute URLs, no traversal). */
+export function isAllowedImagePath(filePath: string): boolean {
+  return filePath.startsWith(UPLOAD_ROOT) && !filePath.includes("..");
+}
+
 /** Builds the public URL for a stored ImageKit path. */
 export function imageUrl(filePath: string): string {
-  if (/^https?:\/\//.test(filePath)) return filePath;
   const base = (env.IMAGE_KIT_END_POINT ?? "").replace(/\/$/, "");
   return `${base}/${filePath.replace(/^\//, "")}`;
 }

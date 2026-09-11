@@ -8,6 +8,8 @@ export interface Hotkey {
   alt?: boolean;
   /** Fire even when focus is in an input/textarea. Defaults to false unless `mod` is set. */
   global?: boolean;
+  /** Only register while true. Lets callers avoid swallowing keys such as Escape when idle. */
+  enabled?: boolean;
   handler: (event: KeyboardEvent) => void;
 }
 
@@ -22,6 +24,7 @@ export function useHotkeys(hotkeys: Hotkey[], enabled = true): void {
     if (!enabled) return;
     const onKeyDown = (event: KeyboardEvent) => {
       for (const hk of hotkeys) {
+        if (hk.enabled === false) continue;
         const modPressed = event.metaKey || event.ctrlKey;
         if (Boolean(hk.mod) !== modPressed) continue;
         if (Boolean(hk.shift) !== event.shiftKey) continue;

@@ -3,7 +3,9 @@ import { Navigate, Outlet, useLocation, useNavigate, useSearchParams } from "rea
 import { useAuth } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
-import { modKey } from "@/lib/utils";
+import { safeLocalStorage } from "@/lib/utils";
+import { SHORTCUTS } from "@/lib/shortcuts";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { useHotkeys } from "@/hooks/useHotkeys";
 import { useOnlineStatus } from "@/hooks/usePwa";
 import { useUser } from "@/hooks/useUser";
@@ -15,7 +17,7 @@ import { CommandPalette } from "@/components/search/CommandPalette";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { Sidebar } from "./Sidebar";
 
-const TOUR_KEY = "koala:tour-done";
+const storage = safeLocalStorage();
 
 /** Authenticated application frame: sidebar, global dialogs, shortcuts and the routed page. */
 export function AppShell() {
@@ -48,20 +50,22 @@ function Shell() {
   const shortcutsOpen = useUi((s) => s.shortcutsOpen);
   const setShortcutsOpen = useUi((s) => s.setShortcutsOpen);
   const stop = useChatStore((s) => s.stop);
+  const streaming = useChatStore((s) => s.streaming);
 
   const [tourOpen, setTourOpen] = useState(false);
   useEffect(() => {
     const forced = params.get("tour") === "1";
-    const done = localStorage.getItem(TOUR_KEY) === "1";
+    const done = storage.get(STORAGE_KEYS.tourDone) === "1";
     if (user && (forced || (!user.onboarded && !done))) setTourOpen(true);
   }, [user, params]);
 
   const finishTour = () => {
     setTourOpen(false);
-    localStorage.setItem(TOUR_KEY, "1");
+    storage.set(STORAGE_KEYS.tourDone, "1");
     if (params.has("tour")) {
-      params.delete("tour");
-      setParams(params, { replace: true });
+      const next = new URLSearchParams(params);
+      next.delete("tour");
+      setParams(next, { replace: true });
     }
     if (user && !user.onboarded) void api.users.onboarded();
   };
@@ -72,22 +76,13 @@ function Shell() {
       { key: "o", mod: true, shift: true, handler: () => navigate("/dashboard") },
       { key: "b", mod: true, handler: toggleSidebar },
       { key: "l", mod: true, shift: true, handler: cycleTheme },
-      { key: "Escape", global: true, handler: stop },
+      // Registered only while streaming so Escape still closes dialogs and menus when idle.
+      { key: "Escape", global: true, enabled: streaming, handler: stop },
       { key: "?", shift: true, handler: () => setShortcutsOpen(true) },
     ],
-    [cycleTheme, navigate, setPaletteOpen, setShortcutsOpen, stop, toggleSidebar],
+    [cycleTheme, navigate, setPaletteOpen, setShortcutsOpen, stop, streaming, toggleSidebar],
   );
   useHotkeys(hotkeys);
-
-  const shortcuts = [
-    { keys: [modKey, "K"], label: t("shortcuts.search") },
-    { keys: [modKey, "⇧", "O"], label: t("shortcuts.newChat") },
-    { keys: [modKey, "B"], label: t("shortcuts.toggleSidebar") },
-    { keys: [modKey, "⇧", "L"], label: t("shortcuts.theme") },
-    { keys: ["/"], label: t("shortcuts.focus") },
-    { keys: ["Esc"], label: t("shortcuts.stop") },
-    { keys: ["?"], label: t("shortcuts.help") },
-  ];
 
   return (
     <div className="flex h-dvh overflow-hidden bg-bg">
@@ -105,9 +100,9 @@ function Shell() {
       <OnboardingTour open={tourOpen} onClose={finishTour} />
       <Dialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} title={t("settings.shortcuts")} size="sm">
         <ul className="flex flex-col gap-2 text-sm">
-          {shortcuts.map((s) => (
-            <li key={s.label} className="flex items-center justify-between">
-              <span className="text-fg-muted">{s.label}</span>
+          {SHORTCUTS.map((s) => (
+            <li key={s.labelKey} className="flex items-center justify-between">
+              <span className="text-fg-muted">{t(s.labelKey)}</span>
               <span className="flex gap-1">
                 {s.keys.map((k) => (
                   <Kbd key={k}>{k}</Kbd>

@@ -1,5 +1,8 @@
 {
-  "app": { "name": "KOALA AI", "tagline": "Votre assistant IA sympathique" },
+  "app": {
+    "name": "KOALA AI",
+    "tagline": "Votre assistant IA sympathique"
+  },
   "nav": {
     "newChat": "Nouvelle discussion",
     "search": "Rechercher",
@@ -15,8 +18,6 @@
     "signUp": "Commencer",
     "archived": "Archivées",
     "pinned": "Épinglées",
-    "folders": "Dossiers",
-    "tags": "Étiquettes",
     "recent": "Récentes",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
@@ -25,12 +26,19 @@
     "older": "Plus anciennes",
     "noChats": "Aucune discussion",
     "noChatsHint": "Commencez une conversation, elle apparaîtra ici.",
-    "toggleSidebar": "Afficher/masquer le menu",
-    "upgrade": "KOALA AI Pro",
-    "upgradeHint": "Messages illimités et modèles prioritaires"
+    "toggleSidebar": "Afficher/masquer le menu"
   },
-  "theme": { "label": "Thème", "system": "Système", "light": "Clair", "dark": "Sombre" },
-  "language": { "label": "Langue", "en": "English", "fr": "Français" },
+  "theme": {
+    "label": "Thème",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "fr": "Français"
+  },
   "composer": {
     "placeholder": "Posez votre question…",
     "placeholderDoc": "Interrogez vos documents…",
@@ -50,7 +58,9 @@
     "hint": "Entrée pour envoyer · Maj+Entrée pour un retour à la ligne",
     "quota": "{{remaining}} messages restants sur {{limit}} aujourd'hui",
     "quotaReached": "Vous avez atteint la limite quotidienne de messages.",
-    "uploading": "Envoi…"
+    "uploadsDisabled": "L'envoi d'images n'est pas configuré sur ce serveur.",
+    "imagePromptPlaceholder": "Un koala à l'aquarelle qui code sur un ordinateur portable, lumière douce du matin",
+    "urlPlaceholder": "https://exemple.com/article"
   },
   "message": {
     "copy": "Copier",
@@ -65,7 +75,6 @@
     "toolUsed": "Outil utilisé",
     "tokens": "{{count}} jetons",
     "edited": "modifié",
-    "thinking": "Réflexion…",
     "followUps": "Questions suggérées",
     "you": "Vous",
     "assistant": "KOALA AI",
@@ -73,7 +82,8 @@
     "cancel": "Annuler",
     "copyCode": "Copier le code",
     "document": "Document",
-    "generationStopped": "Génération arrêtée."
+    "diagramError": "Impossible d'afficher le diagramme",
+    "attachedImage": "Image jointe"
   },
   "chat": {
     "rename": "Renommer",
@@ -104,30 +114,46 @@
     "selectMode": "Sélectionner",
     "selected": "{{count}} sélectionnée(s)",
     "deleteSelected": "Supprimer la sélection",
-    "clearAll": "Effacer tout l'historique",
     "clearAllConfirm": "Supprimer TOUTES vos discussions ? Cette action est irréversible.",
     "notFound": "Cette discussion n'existe pas.",
-    "titleUpdated": "Titre mis à jour",
     "addTag": "Ajouter une étiquette",
     "chatSettings": "Paramètres de la discussion",
     "instructions": "Instructions personnalisées pour cette discussion",
-    "modelForChat": "Modèle pour cette discussion"
+    "modelForChat": "Modèle pour cette discussion",
+    "shared": "Partagée",
+    "moreActions": "Plus d'actions"
   },
   "dashboard": {
     "greeting": "Bonjour{{name}}, comment puis-je vous aider ?",
     "subtitle": "Posez une question, déposez une image ou choisissez une suggestion.",
     "cards": {
-      "chat": { "title": "Nouvelle discussion", "text": "Demandez n'importe quoi, dans votre langue." },
-      "image": { "title": "Analyser des images", "text": "Importez une photo ou une capture d'écran." },
-      "code": { "title": "Aide au code", "text": "Expliquer, déboguer ou écrire des tests." },
-      "docs": { "title": "Interroger des documents", "text": "Importez des PDF et posez vos questions." }
+      "chat": {
+        "title": "Nouvelle discussion",
+        "text": "Demandez n'importe quoi, dans votre langue."
+      },
+      "image": {
+        "title": "Analyser des images",
+        "text": "Importez une photo ou une capture d'écran."
+      },
+      "code": {
+        "title": "Aide au code",
+        "text": "Expliquer, déboguer ou écrire des tests."
+      },
+      "docs": {
+        "title": "Interroger des documents",
+        "text": "Importez des PDF et posez vos questions."
+      }
     },
     "suggestions": [
       "Explique l'informatique quantique comme à un enfant de 12 ans",
       "Rédige un e-mail poli pour décliner une réunion",
       "Quel temps fait-il à Casablanca aujourd'hui ?",
       "Propose un entraînement de 20 minutes sans matériel"
-    ]
+    ],
+    "inserts": {
+      "image": "Décris ce que tu vois sur cette image : ",
+      "code": "Aide-moi avec ce code :\n\n```\n\n```"
+    }
   },
   "search": {
     "title": "Recherche",
@@ -147,7 +173,6 @@
     "title": "Paramètres",
     "general": "Général",
     "model": "Modèle et comportement",
-    "privacy": "Données et confidentialité",
     "defaultModel": "Modèle par défaut",
     "systemInstruction": "Instructions personnalisées",
     "systemInstructionHint": "Indiquez à KOALA comment répondre : ton, format, personnalité, éléments à retenir.",
@@ -253,10 +278,10 @@
     "deleteUserConfirm": "Supprimer cet utilisateur et toutes ses données ?",
     "default": "par défaut",
     "updated": "Utilisateur mis à jour",
-    "forbidden": "Cette page est réservée aux administrateurs."
+    "forbidden": "Cette page est réservée aux administrateurs.",
+    "userActions": "Actions sur l'utilisateur"
   },
   "share": {
-    "title": "Conversation partagée",
     "readOnly": "Lecture seule · partagée depuis KOALA AI",
     "cta": "Démarrer votre propre discussion",
     "notFound": "Cette conversation partagée n'existe pas ou a été révoquée."
@@ -268,26 +293,65 @@
     "ctaSecondary": "Voir les fonctionnalités",
     "features": {
       "title": "Tout ce que vous attendez d'un assistant",
-      "chat": { "title": "Réponses en streaming", "text": "Markdown instantané avec code, tableaux et formules." },
-      "vision": { "title": "Compréhension d'images", "text": "Déposez des captures ou des photos et posez vos questions." },
-      "search": { "title": "Recherche web", "text": "Réponses fondées avec sources citées." },
-      "docs": { "title": "Dialoguez avec vos fichiers", "text": "Importez des PDF et obtenez des réponses référencées." },
-      "tools": { "title": "Outils", "text": "Calculatrice, météo et heure, appelés automatiquement." },
-      "privacy": { "title": "Vos données, vos règles", "text": "Exportez, partagez ou supprimez tout en un clic." }
+      "chat": {
+        "title": "Réponses en streaming",
+        "text": "Markdown instantané avec code, tableaux et formules."
+      },
+      "vision": {
+        "title": "Compréhension d'images",
+        "text": "Déposez des captures ou des photos et posez vos questions."
+      },
+      "search": {
+        "title": "Recherche web",
+        "text": "Réponses fondées avec sources citées."
+      },
+      "docs": {
+        "title": "Dialoguez avec vos fichiers",
+        "text": "Importez des PDF et obtenez des réponses référencées."
+      },
+      "tools": {
+        "title": "Outils",
+        "text": "Calculatrice, météo et heure, appelés automatiquement."
+      },
+      "privacy": {
+        "title": "Vos données, vos règles",
+        "text": "Exportez, partagez ou supprimez tout en un clic."
+      }
     },
     "demo": "Essayer la démo",
     "openSource": "Open source sur GitHub",
-    "footer": "Construit avec React, Express, MongoDB et Gemini."
+    "footer": "Construit avec React, Express, MongoDB et Gemini.",
+    "footerLinks": {
+      "terms": "Conditions",
+      "privacy": "Confidentialité",
+      "github": "GitHub"
+    },
+    "steps": {
+      "signUp": "Créez un compte gratuit en quelques secondes.",
+      "chat": "Posez une question, déposez une image ou choisissez une suggestion."
+    }
   },
   "onboarding": {
     "skip": "Passer",
     "next": "Suivant",
     "done": "C'est parti",
     "steps": [
-      { "title": "Bienvenue sur KOALA AI 🐨", "text": "Posez vos questions dans le champ ci-dessous. Les réponses s'affichent en temps réel avec une mise en forme riche." },
-      { "title": "Images et fichiers", "text": "Déposez une image dans le champ de saisie ou importez des documents pour dialoguer avec eux." },
-      { "title": "Recherche, outils et mémoire", "text": "Activez la recherche web et les outils par message. Les longues discussions sont résumées automatiquement." },
-      { "title": "Personnalisez", "text": "Choisissez un modèle, définissez des instructions, changez de thème et de langue dans les paramètres. Appuyez sur {{mod}}+K à tout moment." }
+      {
+        "title": "Bienvenue sur KOALA AI 🐨",
+        "text": "Posez vos questions dans le champ ci-dessous. Les réponses s'affichent en temps réel avec une mise en forme riche."
+      },
+      {
+        "title": "Images et fichiers",
+        "text": "Déposez une image dans le champ de saisie ou importez des documents pour dialoguer avec eux."
+      },
+      {
+        "title": "Recherche, outils et mémoire",
+        "text": "Activez la recherche web et les outils par message. Les longues discussions sont résumées automatiquement."
+      },
+      {
+        "title": "Personnalisez",
+        "text": "Choisissez un modèle, définissez des instructions, changez de thème et de langue dans les paramètres. Appuyez sur {{mod}}+K à tout moment."
+      }
     ]
   },
   "common": {
@@ -297,7 +361,6 @@
     "confirm": "Confirmer",
     "delete": "Supprimer",
     "close": "Fermer",
-    "back": "Retour",
     "error": "Une erreur est survenue",
     "retry": "Réessayer",
     "offline": "Vous êtes hors ligne",
@@ -305,10 +368,8 @@
     "notFound": "Page introuvable",
     "notFoundHint": "La page que vous cherchez n'existe pas.",
     "goHome": "Retour à l'accueil",
-    "yes": "Oui",
-    "no": "Non",
-    "optional": "facultatif",
-    "signInRequired": "Veuillez vous connecter pour continuer."
+    "connectionLost": "Connexion perdue. Veuillez réessayer.",
+    "requestFailed": "La requête a échoué"
   },
   "contact": {
     "title": "Contact",
@@ -321,5 +382,15 @@
     "linkedinText": "Connectons-nous professionnellement",
     "build": "Construisons ensemble",
     "buildText": "KOALA AI est open source et évolue en permanence. Les contributions sont les bienvenues."
+  },
+  "upload": {
+    "unsupportedType": "Type d'image non pris en charge. Utilisez PNG, JPG, WEBP ou GIF.",
+    "tooLarge": "L'image est trop volumineuse (max {{max}} Mo).",
+    "failed": "L'envoi de l'image a échoué",
+    "badResponse": "Réponse d'envoi inattendue",
+    "networkError": "Erreur réseau pendant l'envoi"
+  },
+  "tools": {
+    "summarizePrompt": "Résume la page web suivante en quelques points, puis liste les points clés.\n\nTitre : {{title}}\nURL : {{url}}\n\n{{text}}"
   }
 }

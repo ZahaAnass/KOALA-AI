@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { safeLocalStorage } from "@/lib/utils";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 import type { GenerateOptions, Message, Source, ToolCall } from "@/types/api";
 
 const storage = safeLocalStorage();
-const OPTIONS_KEY = "koala:composer-options";
+const OPTIONS_KEY = STORAGE_KEYS.composerOptions;
 
 /** State of the answer currently being generated. */
 export interface ActiveGeneration {
@@ -40,7 +41,6 @@ interface ChatState {
   /** Marks the generation as failed. The optimistic user message is dropped when it was persisted. */
   fail: (message: string) => void;
   finish: () => void;
-  clear: () => void;
   stop: () => void;
   setFollowUps: (chatId: string, items: string[]) => void;
   setOptions: (patch: Partial<ComposerOptions>) => void;
@@ -90,7 +90,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
   finish: () => set({ active: null, streaming: false, controller: null }),
-  clear: () => set({ active: null, streaming: false, controller: null }),
   stop: () => {
     get().controller?.abort();
   },

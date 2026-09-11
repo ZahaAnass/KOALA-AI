@@ -16,10 +16,12 @@ import type {
   UsageResponse,
   User,
   GenerateOptions,
+  ImageRef,
 } from "@/types/api";
+import i18n from "@/i18n";
 import { readSse } from "./sse";
 
-export const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
 
 export class ApiError extends Error {
   constructor(
@@ -51,7 +53,7 @@ async function parseError(res: Response): Promise<ApiError> {
     const body = (await res.json()) as { error?: { code?: string; message?: string; details?: unknown } };
     return new ApiError(res.status, body.error?.message ?? res.statusText, body.error?.code, body.error?.details);
   } catch {
-    return new ApiError(res.status, res.statusText || "Request failed");
+    return new ApiError(res.status, res.statusText || i18n.t("common.requestFailed"));
   }
 }
 
@@ -121,7 +123,6 @@ export const api = {
     clear: () => request<{ deleted: number }>("/api/chats", { method: "DELETE" }),
     feedback: (id: string, messageId: string, feedback: "up" | "down" | null, note?: string) =>
       request<{ ok: true }>(`/api/chats/${id}/messages/${messageId}/feedback`, { method: "POST", body: { feedback, note } }),
-    exportUrl: (id: string, format: "md" | "json" | "pdf") => `${API_URL}/api/chats/${id}/export?format=${format}`,
     export: (id: string, format: "md" | "json" | "pdf") => request<Response>(`/api/chats/${id}/export?format=${format}`, { raw: true }),
     share: (id: string) => request<{ shareToken: string; sharedAt: string }>(`/api/chats/${id}/share`, { method: "POST" }),
     unshare: (id: string) => request<void>(`/api/chats/${id}/share`, { method: "DELETE" }),
@@ -173,15 +174,14 @@ export const api = {
 
   upload: {
     auth: () => request<UploadAuth>("/api/upload"),
-    config: () => request<{ enabled: boolean; allowedTypes: string[]; maxBytes: number; urlEndpoint: string }>("/api/upload/config"),
   },
 };
 
 /** Uploads an image straight to ImageKit using server-signed parameters. */
-export async function uploadImage(file: File, onProgress?: (pct: number) => void): Promise<{ filePath: string; url: string; mimeType: string }> {
+export async function uploadImage(file: File, onProgress?: (pct: number) => void): Promise<ImageRef> {
   const auth = await api.upload.auth();
-  if (!auth.allowedTypes.includes(file.type)) throw new ApiError(400, "Unsupported image type. Use PNG, JPG, WEBP or GIF.");
-  if (file.size > auth.maxBytes) throw new ApiError(400, `Image is too large (max ${Math.round(auth.maxBytes / 1024 / 1024)} MB).`);
+  if (!auth.allowedTypes.includes(file.type)) throw new ApiError(400, i18n.t("upload.unsupportedType"));
+  if (file.size > auth.maxBytes) throw new ApiError(400, i18n.t("upload.tooLarge", { max: Math.round(auth.maxBytes / 1024 / 1024) }));
 
   const form = new FormData();
   form.append("file", file);
@@ -200,14 +200,15 @@ export async function uploadImage(file: File, onProgress?: (pct: number) => void
       if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
     };
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
+      if (xhr.status < 200 || xhr.status >= 300) return reject(new ApiError(xhr.status, i18n.t("upload.failed")));
+      try {
         const data = JSON.parse(xhr.responseText) as { filePath: string; url: string };
         resolve({ filePath: data.filePath, url: data.url, mimeType: file.type });
-      } else {
-        reject(new ApiError(xhr.status, "Image upload failed"));
+      } catch {
+        reject(new ApiError(xhr.status, i18n.t("upload.badResponse")));
       }
     };
-    xhr.onerror = () => reject(new ApiError(0, "Network error during upload"));
+    xhr.onerror = () => reject(new ApiError(0, i18n.t("upload.networkError")));
     xhr.send(form);
   });
 }

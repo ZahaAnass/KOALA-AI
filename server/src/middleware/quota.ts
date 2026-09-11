@@ -11,43 +11,48 @@ export function quotaFor(user: { role: string; dailyQuota?: number | null }): nu
   return user.dailyQuota ?? env.DAILY_MESSAGE_QUOTA;
 }
 
-/** Enforces a per-user daily message quota. Must run after `requireAuth`. */
+/**
+ * Reserves one message from the caller's daily quota in a single atomic update,
+ * so parallel requests cannot exceed the limit. Must run after `requireAuth`.
+ */
 export async function enforceQuota(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
     const user = req.user;
     if (!user) return next();
     const limit = quotaFor(user);
-    if (limit === Number.POSITIVE_INFINITY || limit === 0 && user.role === "admin") return next();
-
+    if (limit <= 0) throw tooMany("Messaging is disabled for this account.");
     const day = todayKey();
-    const used = user.usage?.day === day ? (user.usage?.count ?? 0) : 0;
-    if (used >= limit) {
-      throw tooMany(`Daily limit of ${limit} messages reached. Try again tomorrow.`);
-    }
+
+    const filter =
+      limit === Number.POSITIVE_INFINITY
+        ? { clerkId: user.clerkId }
+        : { clerkId: user.clerkId, $or: [{ "usage.day": { $ne: day } }, { "usage.count": { $lt: limit } }] };
+
+    const reserved = await User.findOneAndUpdate(
+      filter,
+      [
+        {
+          $set: {
+            "usage.count": { $cond: [{ $eq: ["$usage.day", day] }, { $add: [{ $ifNull: ["$usage.count", 0] }, 1] }, 1] },
+            "usage.day": day,
+            "usage.totalMessages": { $add: [{ $ifNull: ["$usage.totalMessages", 0] }, 1] },
+            lastSeenAt: new Date(),
+          },
+        },
+      ],
+      { new: true },
+    );
+    invalidateUserCache(user.clerkId);
+    if (!reserved) throw tooMany(`Daily limit of ${limit} messages reached. Try again tomorrow.`);
     next();
   } catch (err) {
     next(err);
   }
 }
 
-/** Records one message (and optional token usage) against the user's daily counter. */
-export async function recordUsage(clerkId: string, tokens = 0): Promise<void> {
-  const day = todayKey();
-  const user = await User.findOne({ clerkId }, { "usage.day": 1 });
-  if (!user) return;
-  if (user.usage?.day === day) {
-    await User.updateOne(
-      { clerkId },
-      { $inc: { "usage.count": 1, "usage.totalMessages": 1, "usage.totalTokens": tokens }, $set: { lastSeenAt: new Date() } },
-    );
-  } else {
-    await User.updateOne(
-      { clerkId },
-      {
-        $set: { "usage.day": day, "usage.count": 1, lastSeenAt: new Date() },
-        $inc: { "usage.totalMessages": 1, "usage.totalTokens": tokens },
-      },
-    );
-  }
+/** Adds token usage for a completed generation (the message itself was counted by `enforceQuota`). */
+export async function recordUsage(clerkId: string, tokens: number): Promise<void> {
+  if (tokens <= 0) return;
+  await User.updateOne({ clerkId }, { $inc: { "usage.totalTokens": tokens } });
   invalidateUserCache(clerkId);
 }

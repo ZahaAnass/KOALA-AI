@@ -57,8 +57,8 @@ export function createApp(): express.Application {
     cors({
       origin: (origin, cb) => {
         // Allow same-origin / server-to-server (no Origin header) and configured client URLs.
-        if (!origin || env.CLIENT_URL.includes(origin)) return cb(null, true);
-        cb(new Error(`Origin ${origin} not allowed by CORS`));
+        // Unknown origins simply get no CORS headers (the browser blocks the response) instead of a 500.
+        cb(null, !origin || env.CLIENT_URL.includes(origin));
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

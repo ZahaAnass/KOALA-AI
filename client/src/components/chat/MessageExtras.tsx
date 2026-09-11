@@ -48,7 +48,7 @@ export function ToolCallCard({ call }: { call: ToolCall }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="my-2 overflow-hidden rounded-xl border border-border bg-bg-muted/60 text-xs">
-      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-fg-muted hover:bg-bg-hover">
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-fg-muted hover:bg-bg-hover">
         <Wrench className="size-3.5 text-brand-500" />
         <span className="font-medium text-fg">{t("message.toolUsed")}:</span>
         <code className="font-mono">{call.name}</code>
@@ -91,8 +91,8 @@ export function FollowUps({ items, onPick, disabled }: { items: string[]; onPick
 export function TypingIndicator() {
   return (
     <span className="inline-flex items-center gap-1 py-1" aria-hidden>
-      {[0, 1, 2].map((i) => (
-        <span key={i} className="size-1.5 rounded-full bg-fg-muted animate-pulse-soft" style={{ animationDelay: `${i * 0.2}s` }} />
+      {["[animation-delay:0s]", "[animation-delay:0.2s]", "[animation-delay:0.4s]"].map((delay) => (
+        <span key={delay} className={cn("size-1.5 rounded-full bg-fg-muted animate-pulse-soft", delay)} />
       ))}
     </span>
   );

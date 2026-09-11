@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
 import { z } from "zod";
 
-dotenv.config();
+// Tests run against an in-memory database with explicit variables; a local .env must not leak into them.
+if (process.env.NODE_ENV !== "test") dotenv.config();
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),

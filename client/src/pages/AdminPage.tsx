@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,24 +7,17 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryClient";
 import { formatNumber, formatRelative } from "@/lib/utils";
+import { useDebounced } from "@/hooks/useDebounced";
 import { useUser } from "@/hooks/useUser";
 import { IconButton } from "@/components/ui/Button";
 import { Badge, EmptyState, PageHeader, Skeleton, StatCard } from "@/components/ui/Feedback";
 import { Input } from "@/components/ui/Form";
 import { ConfirmDialog, PromptDialog } from "@/components/ui/Dialog";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@/components/ui/Menu";
+import { Section } from "@/components/ui/Section";
 import { UsageChart } from "@/components/analytics/UsageChart";
-import { ModelBars } from "./UsagePage";
+import { ModelBars } from "@/components/analytics/ModelBars";
 import type { AdminUser } from "@/types/api";
-
-function useDebounced<T>(value: T, delay = 300): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = window.setTimeout(() => setDebounced(value), delay);
-    return () => window.clearTimeout(id);
-  }, [value, delay]);
-  return debounced;
-}
 
 function Avatar({ user }: { user: AdminUser }) {
   const initials = (user.name || user.email || "?")
@@ -45,7 +38,7 @@ export default function AdminPage() {
   const queryClient = useQueryClient();
   const { data: me } = useUser();
   const [search, setSearch] = useState("");
-  const q = useDebounced(search.trim());
+  const q = useDebounced(search.trim(), 300);
   const [quotaTarget, setQuotaTarget] = useState<AdminUser | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
   const locale = i18n.language;
@@ -57,7 +50,6 @@ export default function AdminPage() {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["admin"] });
   };
-  const onError = (err: unknown) => toast.error(err instanceof Error ? err.message : t("common.error"));
 
   const updateUser = useMutation({
     mutationFn: ({ id, patch }: { id: string; patch: { role?: "user" | "admin"; dailyQuota?: number | null } }) => api.admin.updateUser(id, patch),
@@ -65,13 +57,11 @@ export default function AdminPage() {
       toast.success(t("admin.updated"));
       refresh();
     },
-    onError,
   });
 
   const deleteUser = useMutation({
     mutationFn: (id: string) => api.admin.deleteUser(id),
     onSuccess: refresh,
-    onError,
   });
 
   if (me && !isAdmin) {
@@ -123,23 +113,18 @@ export default function AdminPage() {
           </div>
 
           <div className="grid gap-5 lg:grid-cols-[2fr_1fr]">
-            <section className="surface rounded-2xl p-5">
-              <h2 className="mb-4 font-display text-base font-semibold">{t("admin.activity")}</h2>
+            <Section title={t("admin.activity")}>
               <UsageChart data={s.daily.map((d) => ({ day: d.day, a: d.messages, b: d.activeUsers }))} labelA={t("admin.messages")} labelB={t("admin.users")} />
-            </section>
-            <section className="surface rounded-2xl p-5">
-              <h2 className="mb-4 font-display text-base font-semibold">{t("usage.byModel")}</h2>
-              {s.models.length > 0 ? <ModelBars models={s.models} /> : <p className="text-sm text-fg-muted">—</p>}
-            </section>
+            </Section>
+            <Section title={t("usage.byModel")}>{s.models.length > 0 ? <ModelBars models={s.models} /> : <p className="text-sm text-fg-muted">—</p>}</Section>
           </div>
         </>
       )}
 
-      <section className="surface flex flex-col gap-4 rounded-2xl p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-base font-semibold">{t("admin.users")}</h2>
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("admin.searchUsers")} className="max-w-xs" aria-label={t("admin.searchUsers")} />
-        </div>
+      <Section
+        title={t("admin.users")}
+        actions={<Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("admin.searchUsers")} className="max-w-xs" aria-label={t("admin.searchUsers")} />}
+      >
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-sm">
@@ -184,7 +169,7 @@ export default function AdminPage() {
                   <td className="py-3 text-right">
                     <Menu>
                       <MenuTrigger>
-                        <IconButton label={t("admin.setQuota")} size="sm">
+                        <IconButton label={t("admin.userActions")} size="sm">
                           <MoreHorizontal />
                         </IconButton>
                       </MenuTrigger>
@@ -214,7 +199,7 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
-      </section>
+      </Section>
 
       <PromptDialog
         open={quotaTarget !== null}
