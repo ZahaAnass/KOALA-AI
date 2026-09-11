@@ -1,308 +1,258 @@
-# Cahier des Charges Logiciel
+<p align="center">
+  <img src="client/public/logo.png" alt="KOALA AI logo" width="96" />
+</p>
 
-## 1. Informations générales
+<h1 align="center">KOALA AI</h1>
 
-**Titre du projet : Koala Ai**  
-**Chef de projet : Anass Zaha**  
-**Date : 11/10/2025**
-**Version : 1.0**
+<p align="center">
+  A fast, friendly AI assistant that chats, understands images, searches the web and answers from your own documents.
+</p>
 
-## Résumé exécutif
-
-KOALA AI est une application web d’intelligence artificielle visant à offrir une expérience de chat avancée entre l’utilisateur et un modèle IA (Google Gemini).  
-Le projet repose sur une architecture client-serveur moderne (React + Node.js + MongoDB) et intègre des services tiers tels que Clerk pour l’authentification et ImageKit pour la gestion des médias.  
-L’objectif est de proposer une interface fluide, sécurisée et évolutive, adaptée aux besoins des utilisateurs professionnels et grand public.
-
-### Interfaces utilisateur
-
-![Koala AI: Home page](./client/public/Home.png)
-![Koala AI: Chat page](./client/public/Chat.png)
-![Koala AI: Dashboard page](./client/public/Dashboard.png)
+<p align="center">
+  <a href="https://github.com/ZahaAnass/KOALA-AI/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ZahaAnass/KOALA-AI/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
+  <img alt="Node >= 20" src="https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg" />
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-ff69b4.svg" /></a>
+</p>
 
 ---
 
-## 2. Introduction
+## Screenshots
 
-### 2.1 Contexte
+| Landing                             | Dashboard                                | Chat                            |
+| ----------------------------------- | ---------------------------------------- | ------------------------------- |
+| ![Landing](client/public/Home.png) | ![Dashboard](client/public/Dashboard.png) | ![Chat](client/public/chat.png) |
 
-KOALA AI est une application de chatbot intelligente développée pour fournir une interface conversationnelle avancée utilisant l'intelligence artificielle. Le projet répond au besoin croissant d'assistants IA personnalisés capables de comprendre et de répondre à des requêtes variées, incluant l'analyse d'images et la génération de contenu.
+## Features
 
-### 2.2 Objectifs
+**Chat experience**
 
-- Créer un chatbot IA conversationnel intuitif et performant
-- Permettre l'upload et l'analyse d'images via IA
-- Offrir une expérience utilisateur moderne et responsive
-- Gérer l'historique des conversations de manière persistante
-- Fournir une authentification sécurisée des utilisateurs
+- Streaming answers over Server-Sent Events, with stop, regenerate and edit-and-resend
+- Markdown rendering with GFM tables, KaTeX math, syntax-highlighted code with copy buttons and Mermaid diagrams
+- Suggested follow-up questions after each answer
+- Image understanding: drop, paste or attach up to four images per message
+- Image generation with Gemini, saved straight into the conversation
+- Voice input (Web Speech API) and read-aloud playback
 
-### 2.3 Portée du projet
+**Knowledge and tools**
 
-**Fonctionnalités incluses :**
-- Interface de chat en temps réel avec IA (Google Gemini)
-- Authentification utilisateur (Clerk)
-- Upload et analyse d'images (ImageKit)
-- Historique des conversations
-- Interface responsive moderne
+- Web search grounding with cited sources
+- Function-calling tools the model invokes on its own: calculator, weather, current date and time
+- Retrieval-augmented answers over your uploaded PDF, TXT, MD, CSV and JSON documents
+- URL summarization: paste a link, get the readable text turned into a prompt
+- Rolling memory: long chats are summarized automatically so context never overflows
 
-**Fonctionnalités non prévues dans cette version :**
-- Chat vocal/audio
-- Intégration avec d'autres modèles IA
-- Fonctionnalités collaboratives multi-utilisateurs
+**Organization**
 
----
+- Full-text search across all chats, with snippets
+- Pin, archive, tags and folders
+- Public read-only share links that can be revoked at any time
+- Export a chat as Markdown, JSON or PDF
+- Bulk delete and one-click "clear all history"
 
-## 3. Présentation générale
+**Personalization**
 
-- **Type d’application :** Application Web Progressive (SPA)
-- **Utilisateurs cibles :** Administrateurs, utilisateurs authentifiés, visiteurs
-- **Environnement technique prévu :** Navigateurs modernes, desktop et mobile
-- **Technologies principales :** React, Node.js, Express, MongoDB, TailwindCSS, Clerk, ImageKit, Google Gemini AI
+- Model selector: Gemini 2.5 Flash, Flash-Lite and Pro, plus GPT-4o and GPT-4o mini when an OpenAI key is set
+- Custom instructions globally and per chat
+- Creativity (temperature), answer length and safety-filter controls
+- Reusable prompt templates, built-in and your own
+- Dark, light and system themes; English and French
 
----
+**Admin and operations**
 
-## 4. Fonctionnalités principales
+- Per-user daily message quotas and usage analytics with charts
+- Admin dashboard: platform stats, user search, role and quota management
+- Clerk authentication with server-side JWT signature verification and webhook sync
+- Account deletion that wipes every piece of user data
 
-1. **Authentification sécurisée** (Clerk Authentication)
-   - Connexion / Inscription
-   - Gestion des sessions utilisateur
-   
-2. **Interface de chat IA conversationnelle**
-   - Communication en temps réel avec Google Gemini AI
-   - Streaming des réponses
-   - Formatage Markdown des messages
-   
-3. **Gestion des conversations**
-   - Création de nouvelles conversations
-   - Historique des chats persistant
-   - Titre automatique des conversations
-   
-4. **Upload et analyse d'images**
-   - Upload d'images via ImageKit
-   - Analyse d'images par IA
-   - Prévisualisation des images uploadées
-   
-5. **Tableau de bord utilisateur**
-   - Vue d'ensemble des conversations récentes
-   - Accès rapide aux fonctionnalités
-   - Interface moderne et intuitive
+**Platform**
 
----
+- Installable progressive web app with offline shell
+- Keyboard shortcuts and a command palette (`Ctrl/⌘ + K`)
+- Onboarding tour for first-time users
+- OpenAPI documentation served by the API
 
-## 5. Exigences fonctionnelles
+## Architecture
 
-- Le système doit permettre à un utilisateur de créer un compte.
-- L’administrateur peut consulter et modifier les informations des utilisateurs.
-- L’utilisateur peut télécharger ses rapports au format PDF.
+```mermaid
+flowchart LR
+  subgraph Browser
+    SPA[React 19 PWA]
+  end
+  subgraph API["Express + TypeScript"]
+    Auth[Clerk middleware]
+    Routes[REST + SSE routes]
+    Services[Providers · RAG · Tools · Export]
+  end
+  DB[(MongoDB)]
+  Gemini[Google Gemini]
+  OpenAI[OpenAI]
+  IK[ImageKit]
+  Clerk[Clerk]
 
-### 5.1 Authentification et gestion utilisateur
-- L'utilisateur peut se créer un compte via Clerk
-- L'utilisateur peut se connecter/déconnecter de manière sécurisée
-- L'accès au tableau de bord nécessite une authentification
-
-### 5.2 Fonctionnalités de chat
-- L'utilisateur peut créer une nouvelle conversation
-- L'utilisateur peut poser des questions à l'IA et recevoir des réponses en temps réel
-- Le système doit sauvegarder automatiquement l'historique des conversations
-- L'utilisateur peut accéder à ses conversations précédentes
-
-### 5.3 Gestion des images
-- L'utilisateur peut uploader des images (formats : PNG, JPG, JPEG)
-- L'IA doit pouvoir analyser et commenter les images uploadées
-- Les images doivent être stockées de manière sécurisée via ImageKit
-
-### 5.4 Interface utilisateur
-- L'interface doit être responsive et s'adapter aux différents appareils
-- Les messages doivent être formatés en Markdown
-- L'utilisateur doit pouvoir naviguer entre les différentes conversations :** Application Web Progressive (SPA)
-- **Utilisateurs cibles :** 
-  - Utilisateurs finaux cherchant un assistant IA
-  - Développeurs et créateurs de contenu
-  - Professionnels nécessitant une analyse d'images IA
-- **Environnement technique prévu :** 
-  - Navigateurs modernes (Chrome, Firefox, Safari, Edge)
-  - Appareils desktop et mobiles
-  - Compatible avec les systèmes d'exploitation principauxons générales
-
----
-
-## 6. Exigences non fonctionnelles
-
-### 6.1 Performance
-- Temps de réponse de l'IA inférieur à 5 secondes
-- Streaming des réponses pour une expérience fluide
-- Chargement initial de l'application inférieur à 3 secondes
-
-### 6.2 Sécurité
-- Authentification sécurisée via Clerk (OAuth, JWT)
-- Validation des tokens d'authentification côté serveur
-- Sécurisation des uploads d'images via ImageKit
-- Protection CORS configurée
-
-### 6.3 Compatibilité
-- Compatible avec les navigateurs modernes (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
-
-### 6.4 Utilisabilité
-- Interface intuitive et moderne avec TailwindCSS
-- Navigation fluide entre les pages
-- Animations et transitions pour améliorer l'UX
-
----
-
-## 7. Contraintes techniques
-
-### 7.1 Frontend
-- **Framework :** React 19 (RC)
-- **Routing :** React Router DOM v7
-- **Styling :** TailwindCSS v4
-- **Build Tool :** Vite
-- **Authentification :** Clerk React
-- **State Management :** TanStack React Query (pour la gestion du cache)
-- **Autres :** React Type Animation, React Markdown
-
-### 7.2 Backend
-- **Runtime :** Node.js avec TypeScript
-- **Framework :** Express.js
-- **Base de données :** MongoDB avec Mongoose
-- **Authentification :** Clerk SDK Node
-- **Upload d'images :** ImageKit
-- **IA :** Google Generative AI (Gemini)
-
-### 7.3 Infrastructure et services externes
-- **Hébergement d'images :** ImageKit
-- **Service IA :** Google Gemini API
-- **Authentification :** Clerk Authentication Service
-- **Base de données :** MongoDB Atlas (recommandé)
-
-### 7.4 Variables d'environnement requises
-- `VITE_CLERK_PUBLISHABLE_KEY`
-- `VITE_IMAGE_KIT_END_POINT`, `VITE_IMAGE_KIT_PUBLIC_KEY`
-- `VITE_GEMINI_PUBLIC_KEY`
-- `MONGO_URI`, `CLIENT_URL`
-- `IMAGE_KIT_PRIVATE_KEY`
-
----
-
-## 8. Modèles et diagrammes
-
-- Diagramme des cas d’utilisation
-- Diagramme de classes UML
-- Maquettes de l’interface utilisateur
-
-### 8.1 Architecture système
-- **Architecture :** Client-Serveur (SPA + API REST)
-- **Frontend :** React SPA servie par Vite
-- **Backend :** API REST avec Express.js et TypeScript
-- **Base de données :** MongoDB (NoSQL)
-
-### 8.2 Modèles de données
-
-**Chat Model :**
-```typescript
-{
-  userId: string,
-  history: [
-    {
-      role: "user" | "model",
-      parts: [{ text: string }],
-      img?: string
-    }
-  ],
-  timestamps: Date
-}
+  SPA -- "JWT · JSON · SSE" --> Auth --> Routes --> Services
+  Services --> DB
+  Services --> Gemini
+  Services -. optional .-> OpenAI
+  Services --> IK
+  Auth --> Clerk
+  SPA -- signed direct upload --> IK
 ```
 
-**UserChats Model :**
-```typescript
-{
-  userId: string,
-  chats: [
-    {
-      _id: string,
-      title: string,
-      createAt: Date
-    }
-  ],
-  timestamps: Date
-}
-```
+The browser never talks to the model directly. Every generation goes through the API, which verifies the session, enforces quotas, assembles context (memory summary, documents, images) and streams the answer back as SSE events.
 
-### 8.3 Routes API
-- `POST /api/chats` - Créer un nouveau chat
-- `GET /api/chats/:id` - Récupérer un chat spécifique
-- `PUT /api/chats/:id` - Mettre à jour un chat
-- `GET /api/userchats` - Récupérer tous les chats d'un utilisateur
-- `GET /api/upload` - Authentification pour upload d'imagesdoit permettre à un utilisateur de créer un compte via ImageKit
-- L'utilisateur peut se connecter/déconnecter de manière sécurisée
-- L'accès au tableau de bord nécessite une authentification
----
+## Tech stack
 
-## 9. Planification du projet
+| Layer     | Technology                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------ |
+| Client    | React 19, TypeScript, Vite 7, Tailwind CSS 4, React Router 7, TanStack Query 5, Zustand, i18next  |
+| Rendering | react-markdown, remark-gfm, remark-math, rehype-katex, rehype-highlight, Mermaid, Recharts       |
+| Server    | Node 20+, Express 4, TypeScript, Mongoose 8, zod, helmet, express-rate-limit, pino, swagger-ui   |
+| AI        | `@google/genai` (Gemini 2.5, `gemini-embedding-001`, `gemini-2.5-flash-image`), OpenAI via fetch |
+| Auth      | Clerk (`@clerk/clerk-react`, `@clerk/express`, svix webhooks)                                     |
+| Storage   | MongoDB, ImageKit                                                                                |
+| Tooling   | ESLint 9, Prettier, Husky, lint-staged, Vitest, Supertest, Playwright, Docker, GitHub Actions    |
 
-| Phase                              | Durée estimée | Statut    |
-| ---------------------------------- | ------------- | --------- |
-| Analyse des besoins et conception  | 3 jours       | ✅ Terminé |
-| Configuration de l'environnement   | 2 jours       | ✅ Terminé |
-| Développement Frontend (React)     | 8 jours       | ✅ Terminé |
-| Développement Backend (Express/TS) | 6 jours       | ✅ Terminé |
-| Intégration services externes      | 4 jours       | ✅ Terminé |
-| Tests et validation                | 3 jours       | ✅ Terminé |
-| Documentation                      | 2 jours       | 🔄 En cours |
-| Déploiement et mise en production  | 2 jours       | ⏳ À venir |
+## Quick start
 
-**Total estimé :** 30 jours
+**Prerequisites**
 
----
+- Node.js 20 or newer
+- A MongoDB database ([Atlas free tier](https://www.mongodb.com/atlas) or `mongod` locally)
+- A [Clerk](https://clerk.com) application (publishable and secret keys)
+- A Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+- Optional: an [ImageKit](https://imagekit.io) account for image uploads, an OpenAI key for GPT models
 
-## 10. Livrables attendus
+**Install and run**
 
-### 10.1 Livrables techniques
-- ✅ Code source complet du projet (Frontend React + Backend Express/TS)
-- ✅ Configuration des services externes (Clerk, ImageKit, Google Gemini)
-- ✅ Base de données MongoDB avec modèles définis
-- ✅ API REST documentée et fonctionnelle
-
-### 10.2 Documentation
-- ✅ README avec instructions d'installation
-- ✅ Cahier des charges technique
-- 🔄 Documentation API (Swagger/OpenAPI)
-- ⏳ Manuel utilisateur
-- ⏳ Guide de déploiement
-
-### 10.3 Environnements
-- ✅ Environnement de développement configuré
-- 🔄 Environnement de staging/test
-- ⏳ Environnement de production
-
----
-
-## 11. Validation et tests
-
-### 11.1 Critères d'acceptation
-- ✅ Authentification utilisateur fonctionnelle
-- ✅ Interface de chat responsive et intuitive
-- ✅ Intégration IA (Google Gemini) opérationnelle
-- ✅ Upload et analyse d'images fonctionnels
-- ✅ Sauvegarde persistante des conversations
-- 🔄 Performance conformes aux exigences
-- ⏳ Tests de sécurité validés
-
----
-
-## Annexes
-
-### A. Configuration requise
-- Node.js 18+ 
-- MongoDB 5+
-- Comptes configurés : Clerk, ImageKit, Google AI
-
-### B. Scripts de développement
 ```bash
-# Frontend (client)
-npm run dev    # Serveur de développement
-npm run build  # Build de production
+git clone https://github.com/ZahaAnass/KOALA-AI.git
+cd KOALA-AI
+npm install
 
-# Backend (server)  
-npm run dev    # Serveur avec hot-reload
-npm run build  # Compilation TypeScript
-npm start      # Production
+cp server/.env.example server/.env   # fill in MONGO_URI, CLERK_*, GEMINI_API_KEY
+cp client/.env.example client/.env   # fill in VITE_CLERK_PUBLISHABLE_KEY
+
+npm run dev
 ```
+
+| Service  | URL                             |
+| -------- | ------------------------------- |
+| Client   | http://localhost:5173           |
+| API      | http://localhost:3000           |
+| API docs | http://localhost:3000/api/docs  |
+
+To load demo data for a Clerk user id, run `npm run seed -- --user <clerkUserId> --admin`.
+
+## Docker
+
+```bash
+cp .env.docker.example .env
+cp server/.env.example server/.env   # fill in the same keys as above
+docker compose up --build
+```
+
+The client is served on http://localhost:8080 and proxies `/api` to the server container. MongoDB runs in the `mongo` service with a persistent volume.
+
+## Environment variables
+
+**Server (`server/.env`)**
+
+| Variable                 | Required | Default                   | Description                                                 |
+| ------------------------ | -------- | ------------------------- | ----------------------------------------------------------- |
+| `NODE_ENV`               | no       | `development`             | `development`, `test` or `production`                       |
+| `PORT`                   | no       | `3000`                    | HTTP port                                                   |
+| `LOG_LEVEL`              | no       | `info`                    | pino log level                                              |
+| `CLIENT_URL`             | no       | `http://localhost:5173`   | Comma-separated allowed browser origins (CORS)              |
+| `MONGO_URI`              | yes      |                           | MongoDB connection string                                   |
+| `CLERK_PUBLISHABLE_KEY`  | yes      |                           | Clerk publishable key                                       |
+| `CLERK_SECRET_KEY`       | yes      |                           | Clerk secret key, used to verify session JWTs               |
+| `CLERK_WEBHOOK_SECRET`   | no       |                           | Enables `POST /api/webhooks/clerk` user sync                |
+| `GEMINI_API_KEY`         | yes      |                           | Chat, image generation, embeddings and web search grounding |
+| `OPENAI_API_KEY`         | no       |                           | Adds GPT-4o models to the picker                            |
+| `DEFAULT_MODEL`          | no       | `gemini-2.5-flash`        | Model used when none is selected                            |
+| `IMAGE_KIT_END_POINT`    | no       |                           | ImageKit URL endpoint; uploads are disabled when missing    |
+| `IMAGE_KIT_PUBLIC_KEY`   | no       |                           | ImageKit public key                                         |
+| `IMAGE_KIT_PRIVATE_KEY`  | no       |                           | ImageKit private key                                        |
+| `ADMIN_EMAILS`           | no       |                           | Comma-separated emails granted the admin role               |
+| `DAILY_MESSAGE_QUOTA`    | no       | `200`                     | Messages per user per day                                   |
+| `MAX_HISTORY_MESSAGES`   | no       | `400`                     | Maximum messages stored per chat                            |
+| `RATE_LIMIT_WINDOW_MS`   | no       | `60000`                   | Rate-limit window                                           |
+| `RATE_LIMIT_MAX`         | no       | `120`                     | Requests per window per token/IP                            |
+
+**Client (`client/.env`)**
+
+| Variable                     | Required | Description                                                          |
+| ---------------------------- | -------- | -------------------------------------------------------------------- |
+| `VITE_API_URL`               | no       | API base URL; leave empty to use the Vite dev proxy to port 3000     |
+| `VITE_CLERK_PUBLISHABLE_KEY` | yes      | Clerk publishable key                                                |
+
+## Scripts
+
+Run from the repository root. Add `-w client` or `-w server` to target one workspace.
+
+| Script                 | What it does                                             |
+| ---------------------- | -------------------------------------------------------- |
+| `npm run dev`          | Starts the API and the client with hot reload            |
+| `npm run build`        | Builds both workspaces                                   |
+| `npm run lint`         | ESLint for both workspaces                               |
+| `npm run typecheck`    | TypeScript checks for both workspaces                    |
+| `npm test`             | Unit and integration tests for both workspaces           |
+| `npm run test:e2e -w client` | Playwright end-to-end tests                        |
+| `npm run format`       | Prettier across the repository                           |
+| `npm run seed`         | Seeds demo chats and templates (see `server/src/scripts/seed.ts`) |
+
+## Testing
+
+- **Server**: Vitest + Supertest against an in-memory MongoDB (`mongodb-memory-server`). Covers auth guards, chats, sharing, exports, documents, tools, users and admin. Run `npm test -w server`.
+- **Client**: Vitest with jsdom for the SSE parser and utilities. Run `npm test -w client`.
+- **End-to-end**: Playwright smoke tests for the public pages. Requires a Clerk publishable key in `client/.env`. Run `npm run test:e2e -w client`.
+
+## API
+
+Interactive docs live at `/api/docs` (Swagger UI) and the raw spec at `/api/openapi.json`. A full reference is in [docs/API.md](docs/API.md).
+
+| Area      | Endpoints                                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| Health    | `GET /health`, `GET /ready`                                                                           |
+| Chats     | `GET/POST/DELETE /api/chats`, `GET/PATCH/DELETE /api/chats/:id`, `/meta`, `/bulk-delete`, `/export`    |
+| Messages  | `POST /api/chats/:id/messages`, `PUT …/:messageId`, `POST …/:messageId/regenerate`, `…/feedback`      |
+| Share     | `POST/DELETE /api/chats/:id/share`, `GET /api/share/:token`                                            |
+| Documents | `GET/POST /api/documents`, `POST /api/documents/search`, `DELETE /api/documents/:id`                   |
+| Users     | `GET/DELETE /api/users/me`, `PATCH /api/users/me/settings`, `GET /api/users/me/usage`                  |
+| Admin     | `GET /api/admin/stats`, `GET /api/admin/users`, `PATCH/DELETE /api/admin/users/:id`                    |
+| Misc      | `/api/models`, `/api/prompts`, `/api/tools/url`, `/api/tools/calculate`, `/api/images/generate`, `/api/upload` |
+
+Generation endpoints stream `text/event-stream` with `meta`, `chunk`, `sources`, `tool`, `done` and `error` events. Closing the connection stops generation.
+
+## Deployment
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for Docker Compose on a VPS, Vercel + Render/Railway, MongoDB Atlas, and Clerk production setup.
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md): folder layout, request flow, memory, RAG, data models
+- [API reference](docs/API.md)
+- [Deployment guide](docs/DEPLOYMENT.md)
+- [Original specification](docs/SPECIFICATION.md) (French)
+- [Changelog](CHANGELOG.md)
+
+## Roadmap
+
+- Redis-backed caching and rate limiting for multi-instance deployments
+- Sentry error tracking on both apps
+- Multi-image generation and image editing
+- Native mobile app built on the same API
+- Atlas Vector Search for large document libraries
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, conventions and the pull-request checklist, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
+
+## License
+
+[MIT](LICENSE)
+
+## Author
+
+**Anass Zaha** · [GitHub @ZahaAnass](https://github.com/ZahaAnass) · [LinkedIn](https://www.linkedin.com/in/zaha-anas-101796334/)

@@ -1,0 +1,396 @@
+{
+  "app": {
+    "name": "KOALA AI",
+    "tagline": "Your friendly AI assistant"
+  },
+  "nav": {
+    "newChat": "New chat",
+    "search": "Search chats",
+    "chats": "Chats",
+    "documents": "Documents",
+    "prompts": "Prompt library",
+    "usage": "Usage",
+    "settings": "Settings",
+    "admin": "Admin",
+    "contact": "Contact",
+    "home": "Home",
+    "signIn": "Sign in",
+    "signUp": "Get started",
+    "archived": "Archived",
+    "pinned": "Pinned",
+    "recent": "Recent",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "Previous 7 days",
+    "thisMonth": "Previous 30 days",
+    "older": "Older",
+    "noChats": "No chats yet",
+    "noChatsHint": "Start a conversation and it will show up here.",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fr": "Français"
+  },
+  "composer": {
+    "placeholder": "Ask anything…",
+    "placeholderDoc": "Ask about your documents…",
+    "send": "Send",
+    "stop": "Stop generating",
+    "attach": "Attach image",
+    "voice": "Voice input",
+    "listening": "Listening…",
+    "webSearch": "Web search",
+    "tools": "Tools",
+    "documents": "Use documents",
+    "model": "Model",
+    "templates": "Templates",
+    "generateImage": "Generate image",
+    "summarizeUrl": "Summarize a link",
+    "dropHere": "Drop images to attach",
+    "hint": "Enter to send · Shift+Enter for a new line",
+    "quota": "{{remaining}} of {{limit}} messages left today",
+    "quotaReached": "You reached today's message limit.",
+    "uploadsDisabled": "Image uploads are not configured on this server.",
+    "imagePromptPlaceholder": "A watercolor koala coding on a laptop, soft morning light",
+    "urlPlaceholder": "https://example.com/article"
+  },
+  "message": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "regenerate": "Regenerate",
+    "edit": "Edit",
+    "speak": "Read aloud",
+    "stopSpeaking": "Stop reading",
+    "good": "Good answer",
+    "bad": "Bad answer",
+    "sources": "Sources",
+    "toolUsed": "Used tool",
+    "tokens": "{{count}} tokens",
+    "edited": "edited",
+    "followUps": "Suggested follow-ups",
+    "you": "You",
+    "assistant": "KOALA AI",
+    "saveEdit": "Save & regenerate",
+    "cancel": "Cancel",
+    "copyCode": "Copy code",
+    "document": "Document",
+    "diagramError": "Could not render diagram",
+    "attachedImage": "Attached image"
+  },
+  "chat": {
+    "rename": "Rename",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "delete": "Delete",
+    "share": "Share",
+    "export": "Export",
+    "tags": "Tags",
+    "folder": "Folder",
+    "moveToFolder": "Move to folder",
+    "noFolder": "No folder",
+    "newFolder": "New folder…",
+    "deleteConfirm": "Delete this chat? This cannot be undone.",
+    "deleted": "Chat deleted",
+    "exportMd": "Markdown (.md)",
+    "exportJson": "JSON (.json)",
+    "exportPdf": "PDF (.pdf)",
+    "shareTitle": "Share this chat",
+    "shareHint": "Anyone with the link can read this conversation. Future messages are included.",
+    "shareCreate": "Create public link",
+    "shareRevoke": "Revoke link",
+    "shareCopied": "Link copied",
+    "loadEarlier": "Load earlier messages",
+    "scrollToBottom": "Scroll to bottom",
+    "selectMode": "Select",
+    "selected": "{{count}} selected",
+    "deleteSelected": "Delete selected",
+    "clearAllConfirm": "Delete ALL of your chats? This cannot be undone.",
+    "notFound": "This chat does not exist.",
+    "addTag": "Add tag",
+    "chatSettings": "Chat settings",
+    "instructions": "Custom instructions for this chat",
+    "modelForChat": "Model for this chat",
+    "shared": "Shared",
+    "moreActions": "More actions"
+  },
+  "dashboard": {
+    "greeting": "Hi{{name}}, what can I help with?",
+    "subtitle": "Ask a question, drop an image, or pick a suggestion.",
+    "cards": {
+      "chat": {
+        "title": "Create a new chat",
+        "text": "Ask anything in your language."
+      },
+      "image": {
+        "title": "Analyze images",
+        "text": "Upload a photo or screenshot."
+      },
+      "code": {
+        "title": "Help me with code",
+        "text": "Explain, debug or write tests."
+      },
+      "docs": {
+        "title": "Talk to documents",
+        "text": "Upload PDFs and ask questions."
+      }
+    },
+    "suggestions": [
+      "Explain quantum computing like I'm 12",
+      "Write a polite email declining a meeting",
+      "What's the weather in Casablanca today?",
+      "Give me a 20-minute bodyweight workout"
+    ],
+    "inserts": {
+      "image": "Describe what you see in this image: ",
+      "code": "Help me with this code:\n\n```\n\n```"
+    }
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search chats, commands…",
+    "noResults": "No results",
+    "actions": "Actions",
+    "chats": "Chats",
+    "recent": "Recent",
+    "newChat": "Start a new chat",
+    "toggleTheme": "Toggle theme",
+    "openSettings": "Open settings",
+    "openDocuments": "Open documents",
+    "openPrompts": "Open prompt library",
+    "openUsage": "Open usage"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "model": "Model & behaviour",
+    "defaultModel": "Default model",
+    "systemInstruction": "Custom instructions",
+    "systemInstructionHint": "Tell KOALA how to respond: tone, format, persona, things to remember.",
+    "temperature": "Creativity",
+    "temperatureHint": "Lower is more precise, higher is more creative.",
+    "maxTokens": "Max answer length (tokens)",
+    "safety": "Safety filter",
+    "safetyHint": "How strictly harmful content is blocked.",
+    "safety_off": "Off",
+    "safety_low": "Low",
+    "safety_medium": "Medium",
+    "safety_high": "High",
+    "followUps": "Suggest follow-up questions",
+    "webSearch": "Web search by default",
+    "tools": "Allow tools (calculator, weather, time)",
+    "useDocuments": "Use my documents by default",
+    "saved": "Settings saved",
+    "shortcuts": "Keyboard shortcuts",
+    "dangerZone": "Danger zone",
+    "clearHistory": "Delete all chats",
+    "deleteAccount": "Delete my account",
+    "deleteAccountHint": "Removes your account, chats, documents and templates permanently.",
+    "deleteAccountConfirm": "Type DELETE to confirm",
+    "accountDeleted": "Your account was deleted",
+    "installApp": "Install app",
+    "installHint": "Add KOALA AI to your home screen for a native-like experience.",
+    "replayTour": "Replay onboarding tour",
+    "quotaTitle": "Daily allowance",
+    "quotaText": "{{used}} of {{limit}} messages used today",
+    "quotaUnlimited": "Unlimited messages"
+  },
+  "shortcuts": {
+    "newChat": "New chat",
+    "search": "Search / command palette",
+    "toggleSidebar": "Toggle sidebar",
+    "stop": "Stop generation",
+    "focus": "Focus composer",
+    "theme": "Toggle theme",
+    "help": "Show shortcuts"
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Upload PDFs or text files. KOALA will search them when you enable “Use documents”.",
+    "upload": "Upload document",
+    "dropHint": "Drop a PDF, TXT, MD, CSV or JSON file here (max 10 MB)",
+    "empty": "No documents yet",
+    "chunks": "{{count}} chunks",
+    "delete": "Delete",
+    "uploaded": "Document ready",
+    "deleteConfirm": "Delete this document?",
+    "processing": "Processing…"
+  },
+  "prompts": {
+    "title": "Prompt library",
+    "subtitle": "Reusable prompts. Click one to insert it in the composer.",
+    "builtin": "Built-in",
+    "mine": "My templates",
+    "new": "New template",
+    "edit": "Edit template",
+    "titleField": "Title",
+    "contentField": "Prompt",
+    "categoryField": "Category",
+    "iconField": "Icon",
+    "save": "Save",
+    "delete": "Delete",
+    "empty": "You have no templates yet.",
+    "use": "Use",
+    "saved": "Template saved",
+    "deleted": "Template deleted"
+  },
+  "usage": {
+    "title": "Usage",
+    "subtitle": "Your activity over the last {{days}} days.",
+    "messages": "Messages",
+    "chats": "Chats",
+    "tokens": "Tokens",
+    "documents": "Documents",
+    "perDay": "Messages per day",
+    "byModel": "Answers by model",
+    "you": "You",
+    "assistant": "Assistant",
+    "range7": "7 days",
+    "range30": "30 days",
+    "range90": "90 days"
+  },
+  "admin": {
+    "title": "Admin dashboard",
+    "subtitle": "Platform overview and user management.",
+    "users": "Users",
+    "chats": "Chats",
+    "messages": "Messages",
+    "tokens": "Tokens",
+    "feedback": "Feedback",
+    "activity": "Messages & active users (30 days)",
+    "searchUsers": "Search users…",
+    "role": "Role",
+    "quota": "Daily quota",
+    "lastSeen": "Last seen",
+    "makeAdmin": "Make admin",
+    "makeUser": "Make user",
+    "setQuota": "Set quota",
+    "deleteUser": "Delete user",
+    "deleteUserConfirm": "Delete this user and all their data?",
+    "default": "default",
+    "updated": "User updated",
+    "forbidden": "This page is reserved for administrators.",
+    "userActions": "User actions"
+  },
+  "share": {
+    "readOnly": "Read-only · shared from KOALA AI",
+    "cta": "Start your own chat",
+    "notFound": "This shared chat does not exist or was revoked."
+  },
+  "landing": {
+    "hero": "Supercharge your creativity and productivity",
+    "sub": "KOALA AI is a fast, friendly assistant that chats, understands images, searches the web and answers from your own documents.",
+    "cta": "Get started free",
+    "ctaSecondary": "See features",
+    "features": {
+      "title": "Everything you need from an assistant",
+      "chat": {
+        "title": "Streaming chat",
+        "text": "Instant Markdown answers with code, tables and math."
+      },
+      "vision": {
+        "title": "Image understanding",
+        "text": "Drop screenshots or photos and ask about them."
+      },
+      "search": {
+        "title": "Web search",
+        "text": "Grounded answers with cited sources."
+      },
+      "docs": {
+        "title": "Talk to your files",
+        "text": "Upload PDFs and get answers with references."
+      },
+      "tools": {
+        "title": "Tools",
+        "text": "Calculator, weather and time, called automatically."
+      },
+      "privacy": {
+        "title": "Your data, your call",
+        "text": "Export, share or delete everything in one click."
+      }
+    },
+    "demo": "Try the live demo",
+    "openSource": "Open source on GitHub",
+    "footer": "Built with React, Express, MongoDB and Gemini.",
+    "footerLinks": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "github": "GitHub"
+    },
+    "steps": {
+      "signUp": "Create a free account in seconds.",
+      "chat": "Ask a question, drop an image or pick a suggestion."
+    }
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "done": "Let's go",
+    "steps": [
+      {
+        "title": "Welcome to KOALA AI 🐨",
+        "text": "Ask anything in the composer below. Answers stream in real time with rich formatting."
+      },
+      {
+        "title": "Attach images and files",
+        "text": "Drop an image into the composer or upload documents to chat with them."
+      },
+      {
+        "title": "Search, tools & memory",
+        "text": "Toggle web search and tools per message. Long chats are summarized automatically."
+      },
+      {
+        "title": "Make it yours",
+        "text": "Pick a model, set custom instructions, switch theme and language in Settings. Press {{mod}}+K anytime."
+      }
+    ]
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "close": "Close",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "offline": "You are offline",
+    "online": "Back online",
+    "notFound": "Page not found",
+    "notFoundHint": "The page you are looking for does not exist.",
+    "goHome": "Go home",
+    "connectionLost": "Connection lost. Please try again.",
+    "requestFailed": "Request failed"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Questions, feedback or ideas? Reach out through any channel.",
+    "email": "Email",
+    "emailText": "For general inquiries and support",
+    "github": "GitHub",
+    "githubText": "Star the repo, open issues or contribute",
+    "linkedin": "LinkedIn",
+    "linkedinText": "Connect professionally",
+    "build": "Let's build together",
+    "buildText": "KOALA AI is open source and constantly evolving. Contributions are welcome."
+  },
+  "upload": {
+    "unsupportedType": "Unsupported image type. Use PNG, JPG, WEBP or GIF.",
+    "tooLarge": "Image is too large (max {{max}} MB).",
+    "failed": "Image upload failed",
+    "badResponse": "Unexpected upload response",
+    "networkError": "Network error during upload"
+  },
+  "tools": {
+    "summarizePrompt": "Summarize the following web page in a few bullet points, then list the key takeaways.\n\nTitle: {{title}}\nURL: {{url}}\n\n{{text}}"
+  }
+}

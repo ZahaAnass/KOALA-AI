@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    name: Server
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      MONGO_URI: mongodb://localhost:27017/koala-test
+      MONGOMS_DOWNLOAD_DIR: ~/.cache/mongodb-binaries
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Cache MongoDB binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}
+      - name: Install
+        run: npm ci --ignore-scripts
+      - name: Lint
+        run: npm run lint -w server
+      - name: Typecheck
+        run: npm run typecheck -w server
+      - name: Test
+        run: npm test -w server
+
+  client:
+    name: Client
+    runs-on: ubuntu-latest
+    env:
+      VITE_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+      VITE_API_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm ci --ignore-scripts
+      - name: Lint
+        run: npm run lint -w client
+      - name: Typecheck
+        run: npm run typecheck -w client
+      - name: Test
+        run: npm test -w client
+      - name: Build
+        run: npm run build -w client
+
+  docker:
+    name: Docker images
+    runs-on: ubuntu-latest
+    needs: [server, client]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build server image
+        run: docker build -t koala-ai-server ./server
+      - name: Build client image
+        run: >
+          docker build -t koala-ai-client
+          --build-arg VITE_API_URL=http://localhost:3000
+          --build-arg VITE_CLERK_PUBLISHABLE_KEY=pk_test_placeholder
+          ./client
