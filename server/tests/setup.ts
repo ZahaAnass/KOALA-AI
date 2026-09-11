@@ -1,8 +1,12 @@
 import { afterAll, beforeAll, beforeEach } from "vitest";
 import mongoose from "mongoose";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 process.env.NODE_ENV = "test";
+// Keep the MongoDB binary in one place whether tests run from the workspace root or from server/.
+process.env.MONGOMS_DOWNLOAD_DIR ??= join(homedir(), ".cache", "mongodb-binaries");
 process.env.MONGO_URI = process.env.MONGO_URI ?? "mongodb://127.0.0.1:27017/koala-test";
 process.env.CLIENT_URL = "http://localhost:5173";
 delete process.env.CLERK_SECRET_KEY;

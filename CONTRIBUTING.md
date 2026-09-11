@@ -7,13 +7,13 @@ Thanks for your interest. This guide covers local setup, conventions and what a 
 ```bash
 git clone https://github.com/<you>/KOALA-AI.git
 cd KOALA-AI
-npm install            # installs both workspaces and creates the root package-lock.json
+npm ci                 # installs both workspaces from the root package-lock.json
 cp server/.env.example server/.env
 cp client/.env.example client/.env
 npm run dev
 ```
 
-Running `npm install` once at the root creates the workspace lockfile and installs the Husky pre-commit hook. The hook runs Prettier and ESLint on staged files.
+Running `npm install` (or `npm ci`) at the root installs the Husky pre-commit hook; the workspace lockfile is committed. The hook runs Prettier and ESLint on staged files.
 
 You need Node 20+, a MongoDB connection string, Clerk keys and a Gemini key. See the README for where to get them. The server test suite does not need any of these: it uses an in-memory MongoDB and a test-only auth header.
 

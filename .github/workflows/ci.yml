@@ -17,15 +17,20 @@ jobs:
     env:
       NODE_ENV: test
       MONGO_URI: mongodb://localhost:27017/koala-test
+      MONGOMS_DOWNLOAD_DIR: ~/.cache/mongodb-binaries
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: server/package-lock.json
+      - name: Cache MongoDB binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}
       - name: Install
-        run: npm install --no-audit --no-fund
+        run: npm ci --ignore-scripts
       - name: Lint
         run: npm run lint -w server
       - name: Typecheck
@@ -45,9 +50,8 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: client/package-lock.json
       - name: Install
-        run: npm install --no-audit --no-fund
+        run: npm ci --ignore-scripts
       - name: Lint
         run: npm run lint -w client
       - name: Typecheck
