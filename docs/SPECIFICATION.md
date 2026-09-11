@@ -1,3 +1,5 @@
+> Original project specification (French). The implementation has since evolved; see the README for current features.
+
 # Cahier des Charges Logiciel
 
 ## 1. Informations générales
@@ -113,15 +115,7 @@ KOALA AI est une application de chatbot intelligente développée pour fournir u
 ### 5.4 Interface utilisateur
 - L'interface doit être responsive et s'adapter aux différents appareils
 - Les messages doivent être formatés en Markdown
-- L'utilisateur doit pouvoir naviguer entre les différentes conversations :** Application Web Progressive (SPA)
-- **Utilisateurs cibles :** 
-  - Utilisateurs finaux cherchant un assistant IA
-  - Développeurs et créateurs de contenu
-  - Professionnels nécessitant une analyse d'images IA
-- **Environnement technique prévu :** 
-  - Navigateurs modernes (Chrome, Firefox, Safari, Edge)
-  - Appareils desktop et mobiles
-  - Compatible avec les systèmes d'exploitation principauxons générales
+- L'utilisateur doit pouvoir naviguer entre les différentes conversations
 
 ---
 
@@ -231,9 +225,7 @@ KOALA AI est une application de chatbot intelligente développée pour fournir u
 - `GET /api/chats/:id` - Récupérer un chat spécifique
 - `PUT /api/chats/:id` - Mettre à jour un chat
 - `GET /api/userchats` - Récupérer tous les chats d'un utilisateur
-- `GET /api/upload` - Authentification pour upload d'imagesdoit permettre à un utilisateur de créer un compte via ImageKit
-- L'utilisateur peut se connecter/déconnecter de manière sécurisée
-- L'accès au tableau de bord nécessite une authentification
+- `GET /api/upload` - Authentification pour upload d'images via ImageKit
 ---
 
 ## 9. Planification du projet

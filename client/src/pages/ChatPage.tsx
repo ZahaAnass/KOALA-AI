@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowDown, ChevronUp } from "lucide-react";
+import { ArrowDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useChat, useLoadEarlier, useMessageFeedback } from "@/hooks/useChats";
 import { useChatStream } from "@/hooks/useChatStream";
@@ -149,6 +149,13 @@ export default function ChatPage() {
                     speakingId={speech.speakingId}
                   />
                 ))}
+                {isActiveHere && active?.error && active.answeringMessageId && (
+                  <div className="ml-10">
+                    <Button size="sm" variant="outline" leftIcon={<RefreshCw className="size-4" />} onClick={() => void regenerate(id, active.answeringMessageId!)}>
+                      {t("common.retry")}
+                    </Button>
+                  </div>
+                )}
                 {!streaming && followUps.length > 0 && <FollowUps items={followUps} onPick={(q) => void send({ chatId: id, text: q })} />}
               </>
             )}

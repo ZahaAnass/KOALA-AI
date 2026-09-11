@@ -10,13 +10,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: "http://localhost:5174",
     trace: "on-first-retry",
   },
+  // A dedicated port keeps the e2e run independent from a dev server you may already have open.
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
+    command: "npm run dev -- --port 5174 --strictPort",
+    url: "http://localhost:5174",
+    reuseExistingServer: false,
     timeout: 60_000,
   },
   projects: [

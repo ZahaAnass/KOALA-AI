@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dev-dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Tests & coverage
+coverage/
+playwright-report/
+test-results/
+
+# Misc
+.DS_Store
+*.log
+.claude/worktrees/

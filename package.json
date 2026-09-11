@@ -1,0 +1,41 @@
+{
+  "name": "koala-ai",
+  "version": "2.0.0",
+  "private": true,
+  "description": "KOALA AI monorepo: React 19 PWA client and Express/TypeScript API for a Gemini-powered assistant.",
+  "license": "MIT",
+  "author": "Anass Zaha",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZahaAnass/KOALA-AI.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm test --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "seed": "npm run seed -w server",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,json,md,css}": "prettier --write",
+    "client/src/**/*.{ts,tsx}": "eslint --fix",
+    "server/src/**/*.ts": "eslint --fix"
+  }
+}
