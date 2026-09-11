@@ -20,7 +20,7 @@ jobs:
       MONGOMS_DOWNLOAD_DIR: ~/.cache/mongodb-binaries
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -46,7 +46,7 @@ jobs:
       VITE_API_URL: http://localhost:3000
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
